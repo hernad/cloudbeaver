@@ -125,6 +125,7 @@ export default [
   ['ui_readonly', 'Read-only'],
   ['ui_test', 'Test'],
   ['ui_export', 'Export'],
+  ['ui_export_xlsx', 'Export Xlsx'],
   ['ui_you', 'You'],
 
   ['root_permission_denied', "You don't have permissions"],

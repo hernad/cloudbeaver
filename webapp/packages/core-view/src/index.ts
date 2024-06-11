@@ -10,6 +10,7 @@ export * from './Action/Actions/ACTION_CREATE';
 export * from './Action/Actions/ACTION_DELETE';
 export * from './Action/Actions/ACTION_EDIT';
 export * from './Action/Actions/ACTION_EXPORT';
+export * from './Action/Actions/ACTION_EXPORT_XLSX';
 export * from './Action/Actions/ACTION_FILTER';
 export * from './Action/Actions/ACTION_LAYOUT';
 export * from './Action/Actions/ACTION_NEW_FOLDER';
