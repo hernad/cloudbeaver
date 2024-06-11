@@ -42,7 +42,7 @@ export const ProcessorConfigureDialogFooter = observer<Props>(function Processor
       </Button>
       {isFinalStep ? (
         <Button type="button" mod={['unelevated']} disabled={isExporting} onClick={onExport}>
-          {translate('data_transfer_dialog_export')}
+          {translate('data_transfer_dialog_export_xlsx')}
         </Button>
       ) : (
         <Button type="button" mod={['unelevated']} disabled={isExporting} onClick={onNext}>

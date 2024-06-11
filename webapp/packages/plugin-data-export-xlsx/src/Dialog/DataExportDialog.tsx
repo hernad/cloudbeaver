@@ -22,21 +22,21 @@ export const DataExportDialog: DialogComponent<IExportContext> = observer(functi
 
   const dialog = useDataExportDialog(payload, rejectDialog);
 
-  if (dialog.step === EDataExportStep.Configure && dialog.processor) {
-    return (
-      <ProcessorConfigureDialog
-        processor={dialog.processor}
-        properties={dialog.properties}
-        processorProperties={dialog.processorProperties}
-        error={dialog.exception}
-        isExporting={dialog.processing}
-        outputSettings={dialog.outputSettings}
-        onBack={() => dialog.setStep(EDataExportStep.DataTransferProcessor)}
-        onClose={rejectDialog}
-        onExport={dialog.export}
-      />
-    );
-  }
+  //if (dialog.step === EDataExportStep.Configure && dialog.processor) {
+  //  return (
+  //    <ProcessorConfigureDialog
+  //      processor={dialog.processor}
+  //      properties={dialog.properties}
+  //      processorProperties={dialog.processorProperties}
+  //      error={dialog.exception}
+  //      isExporting={dialog.processing}
+  //      outputSettings={dialog.outputSettings}
+  //      onBack={() => dialog.setStep(EDataExportStep.DataTransferProcessor)}
+  //      onClose={rejectDialog}
+  //      onExport={dialog.export}
+  //    />
+  //  );
+  //}
 
   return <ProcessorSelectDialog context={payload} onSelect={dialog.selectProcessor} onClose={rejectDialog} />;
 });

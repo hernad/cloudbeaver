@@ -21,7 +21,9 @@ interface Props {
 export const ExportProcessorList = observer<Props>(function ExportProcessorList({ processors, onSelect, className }) {
   return (
     <ItemList className={className}>
-      {processors.map(processor => (
+      {processors
+        .filter(processor => processor.name === "XLSX")
+        .map(processor => (
         <ProcessorItem key={processor.id} processor={processor} onSelect={onSelect} />
       ))}
     </ItemList>

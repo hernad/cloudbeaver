@@ -1,7 +1,7 @@
 export default [
   ['plugin_data_export_data_export_settings_group', 'Data export'],
   ['data_transfer_dialog_title', 'Esporta i dati'],
-  ['data_transfer_dialog_export', 'Esporta'],
+  ['data_transfer_dialog_export_xlsx', 'Esporta xlsx'],
   ['data_transfer_dialog_export_tooltip', 'Esporta i risultati in un file'],
   ['data_transfer_dialog_configuration_title', 'Esporta la configurazione'],
   ['data_transfer_dialog_preparation', "Sto preparando l'esportazione in un file. Attendi..."],

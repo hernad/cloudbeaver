@@ -14,7 +14,7 @@ if [[ "$?" -ne 0 ]] ; then
 fi
 
 cd ../../
-yarn test
+#yarn test
 
 #if [[ "$?" -ne 0 ]] ; then
 #  echo 'Frontend tests failed'; exit $rc

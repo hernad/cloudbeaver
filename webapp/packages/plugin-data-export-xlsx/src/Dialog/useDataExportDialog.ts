@@ -74,9 +74,13 @@ export function useDataExportDialog(context: IExportContext, onExport?: () => vo
             this.outputSettings = toJS(outputData.outputSettings);
           }
 
-          this.processorProperties = {};
-          this.setStep(EDataExportStep.Configure);
+
+
+          //this.processorProperties = {};
+          //this.setStep(EDataExportStep.Configure);
           this.exception = null;
+          this.export();
+
         } catch (exception: any) {
           this.notificationService.logException(exception, this.localizationService.translate('data_transfer_dialog_select_processor_fail'));
         }

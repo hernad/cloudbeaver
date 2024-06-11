@@ -24,7 +24,8 @@ export class DataTransferProcessorsResource extends CachedMapResource<string, Da
   protected async loader(): Promise<Map<string, DataTransferProcessorInfo>> {
     const { processors } = await this.graphQLService.sdk.getDataTransferProcessors();
 
-    this.replace(resourceKeyList(processors.map(processor => processor.id)), processors);
+    this.replace(resourceKeyList(processors
+        .map(processor => processor.id)), processors);
 
     return this.data;
   }

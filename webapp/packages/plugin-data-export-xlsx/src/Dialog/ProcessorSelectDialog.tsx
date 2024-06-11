@@ -28,7 +28,9 @@ export const ProcessorSelectDialog = observer<Props>(function ProcessorSelectDia
     forceSuspense: true,
   });
 
-  const processors = dataTransferProcessorsResource.resource.values.slice().sort(sortProcessors);
+  const processors = dataTransferProcessorsResource.resource.values
+     .slice()
+     .sort(sortProcessors)
 
   return (
     <CommonDialogWrapper size="large" fixedSize>
