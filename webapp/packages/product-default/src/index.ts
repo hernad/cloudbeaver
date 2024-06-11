@@ -20,7 +20,7 @@ import connectionTemplate from '@cloudbeaver/plugin-connection-template';
 import connectionPlugin from '@cloudbeaver/plugin-connections';
 import connectionAdministration from '@cloudbeaver/plugin-connections-administration';
 import { dataExportManifest } from '@cloudbeaver/plugin-data-export';
-import { dataExportXlsxManifest } from '@cloudbeaver/plugin-xlsx-data-export';
+import { dataExportXlsxManifest } from '@cloudbeaver/plugin-data-export-xlsx';
 import { dataImportPluginManifest } from '@cloudbeaver/plugin-data-import';
 import { dataSpreadsheetNewManifest } from '@cloudbeaver/plugin-data-spreadsheet-new';
 import { dataViewerManifest } from '@cloudbeaver/plugin-data-viewer';
