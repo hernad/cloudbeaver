@@ -81,10 +81,10 @@ in
          
       buildInputs = [
 
-        openjdk17 
-        maven 
-        yarn 
-        nodejs_20
+        pkgs.openjdk17 
+        pkgs.maven 
+        pkgs.yarn 
+        pkgs.nodejs_20
 
       ];
 
