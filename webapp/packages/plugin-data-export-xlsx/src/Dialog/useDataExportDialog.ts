@@ -13,7 +13,7 @@ import { NotificationService } from '@cloudbeaver/core-events';
 import { LocalizationService } from '@cloudbeaver/core-localization';
 import type { DataTransferOutputSettings, DataTransferProcessorInfo } from '@cloudbeaver/core-sdk';
 
-import { DataExportService } from '../DataExportXlsxService';
+import { DataExportXlsxService } from '../DataExportXlsxService';
 import { DataTransferProcessorsResource } from '../DataTransferProcessorsResource';
 import type { IExportContext } from '../IExportContext';
 import { DefaultExportOutputSettingsResource } from './DefaultExportOutputSettingsResource';
@@ -35,7 +35,7 @@ interface State {
 export function useDataExportDialog(context: IExportContext, onExport?: () => void) {
   const notificationService = useService(NotificationService);
   const localizationService = useService(LocalizationService);
-  const dataExportService = useService(DataExportService);
+  const dataExportXlsxService = useService(DataExportXlsxService);
   const defaultExportOutputSettingsResource = useService(DefaultExportOutputSettingsResource);
   const dataTransferProcessorsResource = useService(DataTransferProcessorsResource);
 
@@ -90,7 +90,7 @@ export function useDataExportDialog(context: IExportContext, onExport?: () => vo
         this.exception = null;
 
         try {
-          await this.dataExportService.exportData(this.context, {
+          await this.dataExportXlsxService.exportData(this.context, {
             processorId: this.processor.id,
             processorProperties: this.processorProperties,
             filter: this.context.filter,
@@ -124,7 +124,7 @@ export function useDataExportDialog(context: IExportContext, onExport?: () => vo
       context,
       onExport,
       notificationService,
-      dataExportService,
+      dataExportXlsxService,
       localizationService,
       defaultExportOutputSettingsResource,
       dataTransferProcessorsResource,

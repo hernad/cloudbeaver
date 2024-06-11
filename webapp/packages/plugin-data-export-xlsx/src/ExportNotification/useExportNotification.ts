@@ -14,17 +14,17 @@ import { LocalizationService } from '@cloudbeaver/core-localization';
 import { ServerErrorType, ServerInternalError } from '@cloudbeaver/core-sdk';
 import { EDeferredState, errorOf } from '@cloudbeaver/core-utils';
 
-import { DataExportProcessService } from '../DataExportXlsxProcessService';
+import { DataExportXlsxProcessService } from '../DataExportXlsxProcessService';
 import type { IExportNotification, IExportNotificationStatus } from './IExportNotification';
 
 export function useExportNotification(notification: IExportNotification) {
-  const dataExportProcessService = useService(DataExportProcessService);
+  const dataExportXlsxProcessService = useService(DataExportXlsxProcessService);
   const localizationService = useService(LocalizationService);
 
   const state = useObservableRef(
     () => ({
       get task() {
-        return this.dataExportProcessService.exportProcesses.get(this.notification.extraProps.source);
+        return this.dataExportXlsxProcessService.exportProcesses.get(this.notification.extraProps.source);
       },
       get resolved() {
         return this.task?.process.getState() === EDeferredState.RESOLVED;
@@ -41,7 +41,7 @@ export function useExportNotification(notification: IExportNotification) {
         return this.localizationService.translate('data_transfer_exporting_sql');
       },
       get downloadUrl() {
-        return this.dataExportProcessService.downloadUrl(this.notification.extraProps.source);
+        return this.dataExportXlsxProcessService.downloadUrl(this.notification.extraProps.source);
       },
       get status(): IExportNotificationStatus {
         const process = this.task?.process;
@@ -74,15 +74,15 @@ export function useExportNotification(notification: IExportNotification) {
         }
       },
       delete() {
-        this.dataExportProcessService.delete(this.notification.extraProps.source);
+        this.dataExportXlsxProcessService.delete(this.notification.extraProps.source);
         this.notification.close(false);
       },
       download() {
-        this.dataExportProcessService.download(this.notification.extraProps.source);
+        this.dataExportXlsxProcessService.download(this.notification.extraProps.source);
         this.notification.close(false);
       },
       cancel() {
-        this.dataExportProcessService.cancel(this.notification.extraProps.source);
+        this.dataExportXlsxProcessService.cancel(this.notification.extraProps.source);
       },
     }),
     {
@@ -94,7 +94,7 @@ export function useExportNotification(notification: IExportNotification) {
       download: action.bound,
       cancel: action.bound,
     },
-    { notification, dataExportProcessService, localizationService },
+    { notification, dataExportXlsxProcessService, localizationService },
   );
 
   return state;
