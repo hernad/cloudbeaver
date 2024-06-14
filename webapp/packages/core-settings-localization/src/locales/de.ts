@@ -5,7 +5,7 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import { DataGrid } from './DataGridLazy';
-
-export * from 'react-data-grid';
-export default DataGrid;
+export default [
+  ['core_settings_localization_settings_locale_label', 'Sprache'],
+  ['core_settings_localization_settings_locale_description', 'Sprache für die Applikation'],
+];
