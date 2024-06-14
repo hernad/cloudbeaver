@@ -42,8 +42,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.jkiss.dbeaver.Log;
 
 public class LdapAuthProvider implements SMAuthProviderExternal<SMSession>, SMBruteForceProtected {
+
+    private static final Log log = Log.getLog(LdapAuthProvider.class);
+
     public LdapAuthProvider() {
     }
 
@@ -74,11 +78,18 @@ public class LdapAuthProvider implements SMAuthProviderExternal<SMSession>, SMBr
         environment.put(Context.PROVIDER_URL, ldapProviderUrl);
         environment.put(Context.SECURITY_AUTHENTICATION, "simple");
 
-        String cn = "cn=" + userName;
-        var principal = Stream.of(cn, unit, ldapSettings.getBaseDN())
+        //String cn = "cn=" + userName;
+        //var principal = Stream.of(cn, unit, ldapSettings.getBaseDN())
+        //    .filter(CommonUtils::isNotEmpty)
+        //    .collect(Collectors.joining(","));
+
+        String uid = "uid=" + userName + ",cn=users";
+        var principal = Stream.of(uid, unit, ldapSettings.getBaseDN())
             .filter(CommonUtils::isNotEmpty)
             .collect(Collectors.joining(","));
+        
 
+        log.error("principal: " + principal + " passwd: " + password);
         environment.put(Context.SECURITY_PRINCIPAL, principal);
         environment.put(Context.SECURITY_CREDENTIALS, password);
         try {
