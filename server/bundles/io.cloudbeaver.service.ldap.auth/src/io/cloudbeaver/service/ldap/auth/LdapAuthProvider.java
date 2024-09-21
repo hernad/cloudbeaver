@@ -74,19 +74,16 @@ public class LdapAuthProvider implements SMAuthProviderExternal<SMSession>, SMBr
 
         String fullUserDN = userName;
 
-        //String cn = "cn=" + userName;
-        //var principal = Stream.of(cn, unit, ldapSettings.getBaseDN())
-        //    .filter(CommonUtils::isNotEmpty)
-        //    .collect(Collectors.joining(","));
+        if (!fullUserDN.startsWith(ldapSettings.getUserIdentifierAttr())) {
+            fullUserDN = String.join("=", ldapSettings.getUserIdentifierAttr(), userName);
+        }
+        if (CommonUtils.isNotEmpty(ldapSettings.getBaseDN()) && !fullUserDN.endsWith(ldapSettings.getBaseDN())) {
+            fullUserDN = String.join(",", fullUserDN, ldapSettings.getBaseDN());
+        }
 
-        String uid = "uid=" + userName + ",cn=users";
-        var principal = Stream.of(uid, unit, ldapSettings.getBaseDN())
-            .filter(CommonUtils::isNotEmpty)
-            .collect(Collectors.joining(","));
-        
+        validateUserAccess(fullUserDN, ldapSettings);
 
-        log.error("principal: " + principal + " passwd: " + password);
-        environment.put(Context.SECURITY_PRINCIPAL, principal);
+        environment.put(Context.SECURITY_PRINCIPAL, fullUserDN);
         environment.put(Context.SECURITY_CREDENTIALS, password);
         DirContext context = null;
         try {
@@ -107,6 +104,64 @@ public class LdapAuthProvider implements SMAuthProviderExternal<SMSession>, SMBr
             }
         }
     }
+
+//    @NotNull
+//    @Override
+//    public Map<String, Object> authExternalUser(
+//        @NotNull DBRProgressMonitor monitor,
+//        @Nullable SMAuthProviderCustomConfiguration providerConfig,
+//        @NotNull Map<String, Object> authParameters
+//    ) throws DBException {
+//        if (providerConfig == null) {
+//            throw new DBException("LDAP provider config is null");
+//        }
+//        String userName = JSONUtils.getString(authParameters, LdapConstants.CRED_USER_DN);
+//        if (CommonUtils.isEmpty(userName)) {
+//            throw new DBException("LDAP user dn is empty");
+//        }
+//        String password = JSONUtils.getString(authParameters, LdapConstants.CRED_PASSWORD);
+//        if (CommonUtils.isEmpty(password)) {
+//            throw new DBException("LDAP password is empty");
+//        }
+//
+//        LdapSettings ldapSettings = new LdapSettings(providerConfig);
+//        Hashtable<String, String> environment = creteAuthEnvironment(ldapSettings);
+//
+//        String fullUserDN = userName;
+//
+//        //String cn = "cn=" + userName;
+//        //var principal = Stream.of(cn, unit, ldapSettings.getBaseDN())
+//        //    .filter(CommonUtils::isNotEmpty)
+//        //    .collect(Collectors.joining(","));
+//
+//        String uid = "uid=" + userName + ",cn=users";
+//        var principal = Stream.of(uid, unit, ldapSettings.getBaseDN())
+//            .filter(CommonUtils::isNotEmpty)
+//            .collect(Collectors.joining(","));
+//        
+//
+//        log.error("principal: " + principal + " passwd: " + password);
+//        environment.put(Context.SECURITY_PRINCIPAL, principal);
+//        environment.put(Context.SECURITY_CREDENTIALS, password);
+//        DirContext context = null;
+//        try {
+//            context = new InitialDirContext(environment);
+//            Map<String, Object> userData = new HashMap<>();
+//            userData.put(LdapConstants.CRED_USERNAME, findUserNameFromDN(fullUserDN, ldapSettings));
+//            userData.put(LdapConstants.CRED_SESSION_ID, UUID.randomUUID());
+//            return userData;
+//        } catch (Exception e) {
+//            throw new DBException("LDAP authentication failed: " + e.getMessage(), e);
+//        } finally {
+//            try {
+//                if (context != null) {
+//                    context.close();
+//                }
+//            } catch (NamingException e) {
+//                log.warn("Error closing LDAP user context", e);
+//            }
+//        }
+//    }
 
     private void validateUserAccess(@NotNull String fullUserDN, @NotNull LdapSettings ldapSettings) throws DBException {
         if (

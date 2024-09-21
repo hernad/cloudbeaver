@@ -19,11 +19,7 @@ import connectionTemplate from '@cloudbeaver/plugin-connection-template';
 import connectionPlugin from '@cloudbeaver/plugin-connections';
 import connectionAdministration from '@cloudbeaver/plugin-connections-administration';
 import { dataExportManifest } from '@cloudbeaver/plugin-data-export';
-<<<<<<< HEAD
-import { dataExportXlsxManifest } from '@cloudbeaver/plugin-data-export-xlsx';
-=======
 import { dataGridPlugin } from '@cloudbeaver/plugin-data-grid';
->>>>>>> devel
 import { dataImportPluginManifest } from '@cloudbeaver/plugin-data-import';
 import { dataSpreadsheetNewManifest } from '@cloudbeaver/plugin-data-spreadsheet-new';
 import { dataViewerManifest } from '@cloudbeaver/plugin-data-viewer';

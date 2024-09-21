@@ -40,11 +40,7 @@
     "@cloudbeaver/plugin-connections": "^0",
     "@cloudbeaver/plugin-connections-administration": "^0",
     "@cloudbeaver/plugin-data-export": "^0",
-<<<<<<< HEAD
-    "@cloudbeaver/plugin-data-export-xlsx": "^0",
-=======
     "@cloudbeaver/plugin-data-grid": "^0",
->>>>>>> devel
     "@cloudbeaver/plugin-data-import": "^0",
     "@cloudbeaver/plugin-data-spreadsheet-new": "^0",
     "@cloudbeaver/plugin-data-viewer": "^0",
