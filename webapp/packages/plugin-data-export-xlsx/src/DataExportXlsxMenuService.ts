@@ -12,7 +12,7 @@ import { CommonDialogService } from '@cloudbeaver/core-dialogs';
 import { LocalizationService } from '@cloudbeaver/core-localization';
 import { DATA_CONTEXT_NAV_NODE, EObjectFeature } from '@cloudbeaver/core-navigation-tree';
 import { withTimestamp } from '@cloudbeaver/core-utils';
-import { ACTION_EXPORT, ACTION_EXPORT_XLSX, ActionService, menuExtractItems, MenuService } from '@cloudbeaver/core-view';
+import { ACTION_EXPORT_XLSX, ActionService, menuExtractItems, MenuService } from '@cloudbeaver/core-view';
 import {
   DATA_CONTEXT_DV_DDM,
   DATA_CONTEXT_DV_DDM_RESULT_INDEX,
@@ -48,20 +48,20 @@ export class DataExportXlsxMenuService {
         return this.dataViewerService.canExportData && (!presentation || presentation.type === DataViewerPresentationType.Data);
       },
       getItems(context, items) {
-        return [...items, ACTION_EXPORT];
+        return [...items, ACTION_EXPORT_XLSX];
       },
       orderItems(context, items) {
-        const extracted = menuExtractItems(items, [ACTION_EXPORT]);
+        const extracted = menuExtractItems(items, [ACTION_EXPORT_XLSX]);
         return [...items, ...extracted];
       },
     });
 
     this.actionService.addHandler({
-      id: 'data-export-base-handler',
+      id: 'data-export-base-handler-xlsx',
       menus: [DATA_VIEWER_DATA_MODEL_ACTIONS_MENU],
       contexts: [DATA_CONTEXT_DV_DDM, DATA_CONTEXT_DV_DDM_RESULT_INDEX],
       isHidden: (context, action) => !this.dataViewerService.canExportData,
-      actions: [ACTION_EXPORT],
+      actions: [ACTION_EXPORT_XLSX],
       isActionApplicable: context => {
         const model = context.get(DATA_CONTEXT_DV_DDM)!;
         return isResultSetDataSource<IDataContainerOptions & IDataQueryOptions>(model.source);
@@ -73,7 +73,7 @@ export class DataExportXlsxMenuService {
         return model.isLoading() || model.isDisabled(resultIndex) || !model.source.getResult(resultIndex);
       },
       getActionInfo(context, action) {
-        if (action === ACTION_EXPORT) {
+        if (action === ACTION_EXPORT_XLSX) {
           return { ...action.info, icon: 'table-export' };
         }
 
@@ -83,7 +83,7 @@ export class DataExportXlsxMenuService {
         const model = context.get(DATA_CONTEXT_DV_DDM)!;
         const resultIndex = context.get(DATA_CONTEXT_DV_DDM_RESULT_INDEX)!;
 
-        if (action === ACTION_EXPORT) {
+        if (action === ACTION_EXPORT_XLSX) {
           const result = model.source.getResult(resultIndex);
           const source = model.source;
 
@@ -128,8 +128,8 @@ export class DataExportXlsxMenuService {
     });
 
     this.actionService.addHandler({
-      id: 'data-export',
-      actions: [ACTION_EXPORT],
+      id: 'data-export-xlsx',
+      actions: [ACTION_EXPORT_XLSX],
       contexts: [DATA_CONTEXT_CONNECTION, DATA_CONTEXT_NAV_NODE],
       handler: async context => {
         const node = context.get(DATA_CONTEXT_NAV_NODE)!;
