@@ -81,7 +81,7 @@ in
          
       buildInputs = [
 
-        pkgs.openjdk17 
+        pkgs.openjdk21 
         pkgs.maven 
         pkgs.yarn 
         pkgs.nodejs_20
