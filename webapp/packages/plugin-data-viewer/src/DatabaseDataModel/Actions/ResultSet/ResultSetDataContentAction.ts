@@ -7,20 +7,20 @@
  */
 import { makeObservable, observable } from 'mobx';
 
-import { QuotasService } from '@cloudbeaver/core-root';
+import { QuotasService, ServerResourceQuotasResource } from '@cloudbeaver/core-root';
 import { GraphQLService, ResultDataFormat } from '@cloudbeaver/core-sdk';
 import { bytesToSize, download, downloadFromURL, GlobalConstants, isNotNullDefined } from '@cloudbeaver/core-utils';
 
-import { DatabaseDataAction } from '../../DatabaseDataAction';
-import type { IDatabaseDataSource } from '../../IDatabaseDataSource';
-import type { IDatabaseResultSet } from '../../IDatabaseResultSet';
-import { databaseDataAction } from '../DatabaseDataActionDecorator';
-import type { IResultSetDataContentAction } from './IResultSetDataContentAction';
-import type { IResultSetElementKey } from './IResultSetDataKey';
-import { isResultSetContentValue } from './isResultSetContentValue';
-import { ResultSetCacheAction } from './ResultSetCacheAction';
-import { ResultSetDataAction } from './ResultSetDataAction';
-import { IResultSetValue, ResultSetFormatAction } from './ResultSetFormatAction';
+import { DatabaseDataAction } from '../../DatabaseDataAction.js';
+import type { IDatabaseDataSource } from '../../IDatabaseDataSource.js';
+import type { IDatabaseResultSet } from '../../IDatabaseResultSet.js';
+import { databaseDataAction } from '../DatabaseDataActionDecorator.js';
+import type { IResultSetDataContentAction } from './IResultSetDataContentAction.js';
+import type { IResultSetElementKey } from './IResultSetDataKey.js';
+import { isResultSetContentValue } from './isResultSetContentValue.js';
+import { ResultSetCacheAction } from './ResultSetCacheAction.js';
+import { ResultSetDataAction } from './ResultSetDataAction.js';
+import { type IResultSetValue, ResultSetFormatAction } from './ResultSetFormatAction.js';
 
 const RESULT_VALUE_PATH = 'sql-result-value';
 const CONTENT_CACHE_KEY = Symbol('content-cache-key');
@@ -34,16 +34,30 @@ interface ICacheEntry {
 @databaseDataAction()
 export class ResultSetDataContentAction extends DatabaseDataAction<any, IDatabaseResultSet> implements IResultSetDataContentAction {
   static dataFormat = [ResultDataFormat.Resultset];
+  private subscriptionDispose?: () => void;
 
   constructor(
     source: IDatabaseDataSource<any, IDatabaseResultSet>,
     private readonly data: ResultSetDataAction,
     private readonly format: ResultSetFormatAction,
     private readonly graphQLService: GraphQLService,
+    private readonly serverResourceQuotasResource: ServerResourceQuotasResource,
     private readonly quotasService: QuotasService,
     private readonly cache: ResultSetCacheAction,
   ) {
     super(source);
+
+    function loadQuotas() {
+      setTimeout(() => serverResourceQuotasResource.load(), 0);
+    }
+
+    this.serverResourceQuotasResource.onDataOutdated.addHandler(loadQuotas);
+
+    loadQuotas();
+
+    this.subscriptionDispose = () => {
+      this.serverResourceQuotasResource.onDataOutdated.removeHandler(loadQuotas);
+    };
 
     makeObservable<this, 'cache'>(this, {
       cache: observable,
@@ -125,7 +139,7 @@ export class ResultSetDataContentAction extends DatabaseDataAction<any, IDatabas
       throw new Error('Failed to get value metadata information');
     }
 
-    const fullText = await this.source.runTask(async () => {
+    const fullText = await this.source.runOperation(async () => {
       try {
         this.updateCache(element, { loading: true });
         return await this.loadFileFullText(this.result, column.position, row);
@@ -133,6 +147,10 @@ export class ResultSetDataContentAction extends DatabaseDataAction<any, IDatabas
         this.updateCache(element, { loading: false });
       }
     });
+
+    if (fullText === null) {
+      throw new Error('Failed to get value metadata information');
+    }
 
     this.updateCache(element, { fullText });
 
@@ -163,11 +181,12 @@ export class ResultSetDataContentAction extends DatabaseDataAction<any, IDatabas
     this.cache.deleteAll(CONTENT_CACHE_KEY);
   }
 
-  dispose(): void {
+  override dispose(): void {
+    this.subscriptionDispose?.();
     this.clearCache();
   }
 
-  private async getFileDataUrl(element: IResultSetElementKey) {
+  private async getFileDataUrl(element: IResultSetElementKey): Promise<string> {
     const column = this.data.getColumn(element.column);
     const row = this.data.getRowValue(element.row);
 
@@ -175,7 +194,7 @@ export class ResultSetDataContentAction extends DatabaseDataAction<any, IDatabas
       throw new Error('Failed to get value metadata information');
     }
 
-    const url = await this.source.runTask(async () => {
+    const url = await this.source.runOperation(async () => {
       try {
         this.updateCache(element, { loading: true });
         return await this.loadDataURL(this.result, column.position, row);
@@ -183,6 +202,10 @@ export class ResultSetDataContentAction extends DatabaseDataAction<any, IDatabas
         this.updateCache(element, { loading: false });
       }
     });
+
+    if (url === null) {
+      throw new Error('Failed to get value metadata information');
+    }
 
     return url;
   }

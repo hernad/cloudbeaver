@@ -5,14 +5,17 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import { ConnectionDialectResource, IConnectionExecutionContextInfo, IConnectionInfoParams } from '@cloudbeaver/core-connections';
+import { ConnectionDialectResource, type IConnectionExecutionContextInfo, type IConnectionInfoParams } from '@cloudbeaver/core-connections';
 import { injectable } from '@cloudbeaver/core-di';
 import { NotificationService } from '@cloudbeaver/core-events';
 import type { SqlDialectInfo } from '@cloudbeaver/core-sdk';
 
 @injectable()
 export class SqlDialectInfoService {
-  constructor(private readonly connectionDialectResource: ConnectionDialectResource, private readonly notificationService: NotificationService) {}
+  constructor(
+    private readonly connectionDialectResource: ConnectionDialectResource,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async formatScript(context: IConnectionExecutionContextInfo, query: string): Promise<string> {
     try {

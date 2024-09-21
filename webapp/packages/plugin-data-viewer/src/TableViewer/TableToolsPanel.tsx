@@ -10,13 +10,13 @@ import { observer } from 'mobx-react-lite';
 import { s, TextPlaceholder, useS, useTranslate } from '@cloudbeaver/core-blocks';
 import type { ResultDataFormat } from '@cloudbeaver/core-sdk';
 
-import type { IDatabaseDataModel } from '../DatabaseDataModel/IDatabaseDataModel';
-import type { IDataPresentationOptions } from '../DataPresentationService';
-import type { IDataTableActions } from './IDataTableActions';
+import type { IDatabaseDataModel } from '../DatabaseDataModel/IDatabaseDataModel.js';
+import type { IDataPresentationOptions } from '../DataPresentationService.js';
+import type { IDataTableActions } from './IDataTableActions.js';
 import styles from './TableToolsPanel.module.css';
 
 interface Props {
-  model: IDatabaseDataModel<any, any>;
+  model: IDatabaseDataModel;
   actions: IDataTableActions;
   dataFormat: ResultDataFormat;
   presentation: IDataPresentationOptions | null;
@@ -28,7 +28,7 @@ export const TableToolsPanel = observer<Props>(function TableToolsPanel({ model,
   const translate = useTranslate();
   const style = useS(styles);
 
-  const result = model.getResult(resultIndex);
+  const result = model.source.getResult(resultIndex);
 
   if (!presentation || (presentation.dataFormat !== undefined && dataFormat !== presentation.dataFormat)) {
     if (model.isLoading()) {

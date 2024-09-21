@@ -8,13 +8,16 @@
 import { injectable } from '@cloudbeaver/core-di';
 import { CachedDataResource } from '@cloudbeaver/core-resource';
 import { SessionResource } from '@cloudbeaver/core-root';
-import { GraphQLService, ObjectPropertyInfo } from '@cloudbeaver/core-sdk';
+import { GraphQLService, type ObjectPropertyInfo } from '@cloudbeaver/core-sdk';
 
 export type TeamMetaParameter = ObjectPropertyInfo;
 
 @injectable()
 export class TeamMetaParametersResource extends CachedDataResource<TeamMetaParameter[]> {
-  constructor(private readonly graphQLService: GraphQLService, sessionResource: SessionResource) {
+  constructor(
+    private readonly graphQLService: GraphQLService,
+    sessionResource: SessionResource,
+  ) {
     super(() => []);
 
     this.sync(

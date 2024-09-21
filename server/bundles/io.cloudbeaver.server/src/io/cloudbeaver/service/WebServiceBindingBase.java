@@ -27,6 +27,7 @@ import io.cloudbeaver.server.CBApplication;
 import io.cloudbeaver.server.CBPlatform;
 import io.cloudbeaver.server.graphql.GraphQLEndpoint;
 import io.cloudbeaver.service.security.SMUtils;
+import io.cloudbeaver.utils.WebAppUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.jkiss.code.NotNull;
@@ -250,6 +251,12 @@ public abstract class WebServiceBindingBase<API_TYPE extends DBWService> impleme
         }
 
         private void checkActionPermissions(@NotNull Method method, @NotNull WebAction webAction) throws DBWebException {
+            var application = CBPlatform.getInstance().getApplication();
+            if (application.isInitializationMode() && webAction.initializationRequired()) {
+                String message = "Server initialization in progress: "
+                    + String.join(",", application.getInitActions().values()) + ".\nDo not restart the server.";
+                throw new DBWebExceptionServerNotInitialized(message);
+            }
             String[] reqPermissions = webAction.requirePermissions();
             if (reqPermissions.length == 0 && !webAction.authRequired()) {
                 return;
@@ -258,7 +265,6 @@ public abstract class WebServiceBindingBase<API_TYPE extends DBWService> impleme
             if (session == null) {
                 throw new DBWebExceptionAccessDenied("No open session - anonymous access restricted");
             }
-            CBApplication<?> application = CBApplication.getInstance();
             if (!application.isConfigurationMode()) {
                 if (webAction.authRequired() && !session.isAuthorizedInSecurityManager()) {
                     log.debug("Anonymous access to " + method.getName() + " restricted");

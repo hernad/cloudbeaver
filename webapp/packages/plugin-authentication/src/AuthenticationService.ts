@@ -11,28 +11,29 @@ import { AdministrationScreenService } from '@cloudbeaver/core-administration';
 import {
   AppAuthService,
   AUTH_PROVIDER_LOCAL_ID,
+  AuthInfoService,
   AuthProviderContext,
   AuthProviderService,
   AuthProvidersResource,
-  RequestedProvider,
+  type RequestedProvider,
   UserInfoResource,
-  UserLogoutInfo,
+  type UserLogoutInfo,
 } from '@cloudbeaver/core-authentication';
 import { Bootstrap, injectable } from '@cloudbeaver/core-di';
-import type { DialogueStateResult } from '@cloudbeaver/core-dialogs';
+import { DialogueStateResult } from '@cloudbeaver/core-dialogs';
 import { NotificationService } from '@cloudbeaver/core-events';
-import { Executor, ExecutorInterrupter, IExecutionContextProvider, IExecutorHandler } from '@cloudbeaver/core-executor';
+import { Executor, ExecutorInterrupter, type IExecutionContextProvider, type IExecutorHandler } from '@cloudbeaver/core-executor';
 import { CachedMapAllKey } from '@cloudbeaver/core-resource';
-import { ISessionAction, ServerConfigResource, sessionActionContext, SessionActionService, SessionDataResource } from '@cloudbeaver/core-root';
+import { type ISessionAction, ServerConfigResource, sessionActionContext, SessionActionService, SessionDataResource } from '@cloudbeaver/core-root';
 import { ScreenService, WindowsService } from '@cloudbeaver/core-routing';
 import { NavigationService } from '@cloudbeaver/core-ui';
 import { uuid } from '@cloudbeaver/core-utils';
 
-import { AuthDialogService } from './Dialog/AuthDialogService';
-import type { IAuthOptions } from './IAuthOptions';
-import { isAutoLoginSessionAction } from './isAutoLoginSessionAction';
+import { AuthDialogService } from './Dialog/AuthDialogService.js';
+import type { IAuthOptions } from './IAuthOptions.js';
+import { isAutoLoginSessionAction } from './isAutoLoginSessionAction.js';
 
-type AuthEventType = 'before' | 'after';
+export type AuthEventType = 'before' | 'after';
 
 @injectable()
 export class AuthenticationService extends Bootstrap {
@@ -49,6 +50,7 @@ export class AuthenticationService extends Bootstrap {
     private readonly appAuthService: AppAuthService,
     private readonly authDialogService: AuthDialogService,
     private readonly userInfoResource: UserInfoResource,
+    private readonly authInfoService: AuthInfoService,
     private readonly notificationService: NotificationService,
     private readonly administrationScreenService: AdministrationScreenService,
     private readonly authProviderService: AuthProviderService,
@@ -65,6 +67,7 @@ export class AuthenticationService extends Bootstrap {
     this.onLogin = new Executor();
 
     this.onLogout.before(this.navigationService.navigationTask);
+    this.onLogin.before(this.navigationService.navigationTask, undefined, () => authInfoService.isAnonymous);
 
     this.authPromise = null;
     this.configureAuthProvider = null;
@@ -141,16 +144,6 @@ export class AuthenticationService extends Bootstrap {
 
     options = observable(options);
 
-    this.authPromise = this.authDialogService
-      .showLoginForm(persistent, options)
-      .then(async state => {
-        await this.onLogin.execute('after');
-        return state;
-      })
-      .finally(() => {
-        this.authPromise = null;
-      });
-
     if (this.serverConfigResource.redirectOnFederatedAuth) {
       await this.authProvidersResource.load(CachedMapAllKey);
 
@@ -160,13 +153,31 @@ export class AuthenticationService extends Bootstrap {
         const configurableProvider = providers.find(provider => provider.configurable);
 
         if (configurableProvider?.configurations?.length === 1) {
-          const configuration = configurableProvider.configurations[0];
+          const configuration = configurableProvider.configurations[0]!;
 
           options.providerId = configurableProvider.id;
           options.configurationId = configuration.id;
         }
       }
     }
+
+    if (this.authPromise) {
+      await this.waitAuth();
+      return;
+    }
+
+    this.authPromise = this.authDialogService
+      .showLoginForm(persistent, options)
+      .then(async state => {
+        if (state === DialogueStateResult.Rejected) {
+          return state;
+        }
+        await this.onLogin.execute('after');
+        return state;
+      })
+      .finally(() => {
+        this.authPromise = null;
+      });
 
     await this.authPromise;
   }
@@ -182,7 +193,7 @@ export class AuthenticationService extends Bootstrap {
     await this.auth(true, { accessRequest: true, providerId: null, linkUser: false });
   }
 
-  register(): void {
+  override register(): void {
     // this.sessionDataResource.beforeLoad.addHandler(
     //   ExecutorInterrupter.interrupter(() => this.appAuthService.isAuthNeeded())
     // );

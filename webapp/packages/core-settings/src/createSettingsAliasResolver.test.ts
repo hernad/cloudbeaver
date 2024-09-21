@@ -5,13 +5,13 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import '@testing-library/jest-dom';
+import { expect, test } from '@jest/globals';
 
 import { SyncExecutor } from '@cloudbeaver/core-executor';
 
-import { expectDeprecatedSettingMessage, expectNoDeprecatedSettingMessage } from './__custom_mocks__/expectDeprecatedSettingMessage';
-import { createSettingsAliasResolver } from './createSettingsAliasResolver';
-import type { ISettingsSource } from './ISettingsSource';
+import { expectDeprecatedSettingMessage, expectNoDeprecatedSettingMessage } from './__custom_mocks__/expectDeprecatedSettingMessage.js';
+import { createSettingsAliasResolver } from './createSettingsAliasResolver.js';
+import type { ISettingsSource } from './ISettingsSource.js';
 
 const deprecatedSettings = {
   deprecated: 'deprecatedValue',

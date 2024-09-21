@@ -8,12 +8,15 @@
 import { Dependency, injectable } from '@cloudbeaver/core-di';
 import type { WsSessionExpiredEvent } from '@cloudbeaver/core-sdk';
 
-import { ServerEventId, SessionEventSource } from './SessionEventSource';
-import { SessionExpireService } from './SessionExpireService';
+import { ServerEventId, SessionEventSource } from './SessionEventSource.js';
+import { SessionExpireService } from './SessionExpireService.js';
 
 @injectable()
 export class SessionExpireEventService extends Dependency {
-  constructor(private readonly sessionEventSource: SessionEventSource, private readonly sessionExpireService: SessionExpireService) {
+  constructor(
+    private readonly sessionEventSource: SessionEventSource,
+    private readonly sessionExpireService: SessionExpireService,
+  ) {
     super();
     this.sessionEventSource.onEvent<WsSessionExpiredEvent>(ServerEventId.CbSessionExpired, () => {
       this.onSessionExpireEvent();

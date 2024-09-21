@@ -13,9 +13,9 @@ import { ACTION_SAVE, ActionService, MenuService } from '@cloudbeaver/core-view'
 import { LocalStorageSqlDataSource } from '@cloudbeaver/plugin-sql-editor';
 import { ACTION_SQL_EDITOR_OPEN, SqlEditorNavigatorService } from '@cloudbeaver/plugin-sql-editor-navigation-tab';
 
-import { DATA_CONTEXT_DDL_VIEWER_NODE } from './DATA_CONTEXT_DDL_VIEWER_NODE';
-import { DATA_CONTEXT_DDL_VIEWER_VALUE } from './DATA_CONTEXT_DDL_VIEWER_VALUE';
-import { MENU_DDL_VIEWER_FOOTER } from './MENU_DDL_VIEWER_FOOTER';
+import { DATA_CONTEXT_DDL_VIEWER_NODE } from './DATA_CONTEXT_DDL_VIEWER_NODE.js';
+import { DATA_CONTEXT_DDL_VIEWER_VALUE } from './DATA_CONTEXT_DDL_VIEWER_VALUE.js';
+import { MENU_DDL_VIEWER_FOOTER } from './MENU_DDL_VIEWER_FOOTER.js';
 
 @injectable()
 export class DDLViewerFooterService {
@@ -36,7 +36,7 @@ export class DDLViewerFooterService {
       handler: async (context, action) => {
         switch (action) {
           case ACTION_SAVE: {
-            const ddl = context.get(DATA_CONTEXT_DDL_VIEWER_VALUE);
+            const ddl = context.get(DATA_CONTEXT_DDL_VIEWER_VALUE)!;
             const nodeId = context.get(DATA_CONTEXT_DDL_VIEWER_NODE);
 
             const blob = new Blob([ddl], {
@@ -50,8 +50,8 @@ export class DDLViewerFooterService {
             break;
           }
           case ACTION_SQL_EDITOR_OPEN: {
-            const ddl = context.get(DATA_CONTEXT_DDL_VIEWER_VALUE);
-            const nodeId = context.get(DATA_CONTEXT_DDL_VIEWER_NODE);
+            const ddl = context.get(DATA_CONTEXT_DDL_VIEWER_VALUE)!;
+            const nodeId = context.get(DATA_CONTEXT_DDL_VIEWER_NODE)!;
 
             const connection = this.connectionInfoResource.getConnectionForNode(nodeId);
             const container = this.navNodeManagerService.getNodeContainerInfo(nodeId);

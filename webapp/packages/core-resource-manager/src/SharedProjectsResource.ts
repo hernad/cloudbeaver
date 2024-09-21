@@ -19,7 +19,7 @@ import {
   ResourceKeyUtils,
 } from '@cloudbeaver/core-resource';
 import { EAdminPermission, SessionPermissionsResource } from '@cloudbeaver/core-root';
-import { GraphQLService, RmProject, RmProjectPermissions, RmSubjectProjectPermissions } from '@cloudbeaver/core-sdk';
+import { GraphQLService, type RmProject, type RmProjectPermissions, type RmSubjectProjectPermissions } from '@cloudbeaver/core-sdk';
 import { isArraysEqual } from '@cloudbeaver/core-utils';
 
 const newSymbol = Symbol('new-project');
@@ -45,7 +45,7 @@ export class SharedProjectsResource extends CachedMapResource<string, SharedProj
     super(() => new Map(), []);
 
     sessionPermissionsResource.require(this, EAdminPermission.admin);
-    this.sync(sessionPermissionsResource, () => {});
+    sessionPermissionsResource.onDataOutdated.addHandler(() => this.markOutdated());
 
     this.connect(projectInfoResource);
     this.onDataOutdated.addHandler(() => projectInfoResource.markOutdated());
@@ -160,7 +160,7 @@ export class SharedProjectsResource extends CachedMapResource<string, SharedProj
     return this.data;
   }
 
-  protected dataSet(key: string, value: SharedProject): void {
+  protected override dataSet(key: string, value: SharedProject): void {
     key = this.getKeyRef(key);
 
     const data = this.data.get(key);

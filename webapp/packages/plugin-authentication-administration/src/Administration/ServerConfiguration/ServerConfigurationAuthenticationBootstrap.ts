@@ -9,12 +9,12 @@ import { AdministrationScreenService } from '@cloudbeaver/core-administration';
 import { AUTH_PROVIDER_LOCAL_ID, AuthProvidersResource, PasswordPolicyService } from '@cloudbeaver/core-authentication';
 import { Bootstrap, injectable } from '@cloudbeaver/core-di';
 import { NotificationService } from '@cloudbeaver/core-events';
-import { ExecutorInterrupter, IExecutorHandler } from '@cloudbeaver/core-executor';
+import { ExecutorInterrupter, type IExecutorHandler } from '@cloudbeaver/core-executor';
 import { CachedMapAllKey } from '@cloudbeaver/core-resource';
-import { ServerConfigResource } from '@cloudbeaver/core-root';
+import { PasswordPolicyResource, ServerConfigResource } from '@cloudbeaver/core-root';
 import {
-  ILoadConfigData,
-  IServerConfigSaveData,
+  type ILoadConfigData,
+  type IServerConfigSaveData,
   ServerConfigurationService,
   serverConfigValidationContext,
 } from '@cloudbeaver/plugin-administration';
@@ -28,16 +28,15 @@ export class ServerConfigurationAuthenticationBootstrap extends Bootstrap {
     private readonly serverConfigResource: ServerConfigResource,
     private readonly notificationService: NotificationService,
     private readonly passwordPolicyService: PasswordPolicyService,
+    private readonly passwordPolicyResource: PasswordPolicyResource,
   ) {
     super();
   }
 
-  register(): void {
+  override register(): void {
     this.serverConfigurationService.validationTask.addHandler(this.validateForm);
     this.serverConfigurationService.loadConfigTask.addHandler(this.loadServerConfig);
   }
-
-  load(): void {}
 
   private readonly loadServerConfig: IExecutorHandler<ILoadConfigData> = async (data, contexts) => {
     if (!data.reset) {
@@ -85,6 +84,7 @@ export class ServerConfigurationAuthenticationBootstrap extends Bootstrap {
       return validation.invalidate();
     }
 
+    await this.passwordPolicyResource.load();
     const passwordValidation = this.passwordPolicyService.validatePassword(data.state.serverConfig.adminPassword);
     if (!passwordValidation.isValid) {
       validation.error(passwordValidation.errorMessage);

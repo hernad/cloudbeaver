@@ -14,7 +14,7 @@ import { EAdminPermission, SessionPermissionsResource } from '@cloudbeaver/core-
 import { AsyncTaskInfoService, GraphQLService } from '@cloudbeaver/core-sdk';
 import { getProgressPercent } from '@cloudbeaver/core-utils';
 
-import { DataImportSettingsService } from './DataImportSettingsService';
+import { DataImportSettingsService } from './DataImportSettingsService.js';
 
 @injectable()
 export class DataImportService {
@@ -41,9 +41,15 @@ export class DataImportService {
   async importData(connectionId: string, contextId: string, projectId: string, resultsId: string, processorId: string, file: File) {
     const abortController = new AbortController();
     let cancelImplementation: (() => void | Promise<void>) | null;
+    let isCancelled = false;
 
     function cancel() {
-      cancelImplementation?.();
+      if (!cancelImplementation) {
+        return;
+      }
+
+      cancelImplementation();
+      isCancelled = true;
     }
 
     const { controller, notification } = this.notificationService.processNotification(
@@ -65,6 +71,10 @@ export class DataImportService {
         processorId,
         file,
         event => {
+          if (isCancelled) {
+            return;
+          }
+
           if (event.total !== undefined) {
             const percentCompleted = getProgressPercent(event.loaded, event.total);
 

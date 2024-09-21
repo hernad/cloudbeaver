@@ -8,12 +8,12 @@
 import type { IConnectionInfoParams } from '@cloudbeaver/core-connections';
 import { injectable } from '@cloudbeaver/core-di';
 import { NotificationService } from '@cloudbeaver/core-events';
-import { DataTransferParameters, GraphQLService } from '@cloudbeaver/core-sdk';
+import { type DataTransferParameters, GraphQLService } from '@cloudbeaver/core-sdk';
 import { Deferred, GlobalConstants, OrderedMap } from '@cloudbeaver/core-utils';
 
-import { ExportFromContainerProcess } from './ExportFromContainerProcess';
-import { ExportFromResultsProcess } from './ExportFromResultsProcess';
-import type { IExportContext } from './IExportContext';
+import { ExportFromContainerProcess } from './ExportFromContainerProcess.js';
+import { ExportFromResultsProcess } from './ExportFromResultsProcess.js';
+import type { IExportContext } from './IExportContext.js';
 
 interface Process {
   taskId: string;
@@ -31,7 +31,10 @@ export interface ExportProcess {
 export class DataExportProcessService {
   readonly exportProcesses = new OrderedMap<string, ExportProcess>(value => value.taskId);
 
-  constructor(private readonly graphQLService: GraphQLService, private readonly notificationService: NotificationService) {}
+  constructor(
+    private readonly graphQLService: GraphQLService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async cancel(exportId: string): Promise<void> {
     const process = this.exportProcesses.get(exportId);

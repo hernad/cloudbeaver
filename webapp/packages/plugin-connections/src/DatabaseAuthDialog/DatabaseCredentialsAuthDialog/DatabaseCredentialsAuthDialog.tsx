@@ -23,10 +23,10 @@ import {
 } from '@cloudbeaver/core-blocks';
 import type { IConnectionInfoParams } from '@cloudbeaver/core-connections';
 
-import { ConnectionAuthenticationFormLoader } from '../../ConnectionAuthentication/ConnectionAuthenticationFormLoader';
+import { ConnectionAuthenticationFormLoader } from '../../ConnectionAuthentication/ConnectionAuthenticationFormLoader.js';
 import style from './DatabaseCredentialsAuthDialog.module.css';
-import { DatabaseCredentialsAuthDialogFooter } from './DatabaseCredentialsAuthDialogFooter';
-import { useDatabaseCredentialsAuthDialog } from './useDatabaseCredentialsAuthDialog';
+import { DatabaseCredentialsAuthDialogFooter } from './DatabaseCredentialsAuthDialogFooter.js';
+import { useDatabaseCredentialsAuthDialog } from './useDatabaseCredentialsAuthDialog.js';
 
 interface Props {
   connection: IConnectionInfoParams;
@@ -62,6 +62,7 @@ export const DatabaseCredentialsAuthDialog = observer<Props>(function DatabaseCr
               authProperties={dialog.connection?.authProperties}
               networkHandlers={networkHandlers}
               formId={`${connection.projectId}:${connection.connectionId}`}
+              projectId={connection.projectId}
               allowSaveCredentials={credentialsSavingEnabled}
               className={s(styles, { connectionAuthenticationFormLoader: true })}
               disabled={dialog.authenticating}
@@ -76,7 +77,7 @@ export const DatabaseCredentialsAuthDialog = observer<Props>(function DatabaseCr
             <ErrorMessage
               text={errorDetails.message ?? translate('core_blocks_exception_message_error_message')}
               hasDetails={errorDetails.hasDetails}
-              className={style.errorMessage}
+              className={style['errorMessage']}
               onShowDetails={errorDetails.open}
             />
           )}

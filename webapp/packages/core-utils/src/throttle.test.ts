@@ -1,7 +1,23 @@
-import { throttle } from './throttle';
+/*
+ * CloudBeaver - Cloud Database Manager
+ * Copyright (C) 2020-2024 DBeaver Corp and others
+ *
+ * Licensed under the Apache License, Version 2.0.
+ * you may not use this file except in compliance with the License.
+ */
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+
+import { throttle } from './throttle.js';
 
 describe('throttle', () => {
-  jest.useFakeTimers();
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('should throttle', () => {
     const callback = jest.fn();
     const throttled = throttle(callback, 100, false);
@@ -42,10 +58,10 @@ describe('throttle', () => {
 
     expect(callback).toHaveBeenCalledTimes(2);
 
-    expect(callback.mock.calls[0][0]).toBe(1);
-    expect(callback.mock.calls[0][1]).toBe(2);
+    expect(callback.mock.calls[0]?.[0]).toBe(1);
+    expect(callback.mock.calls[0]?.[1]).toBe(2);
 
-    expect(callback.mock.calls[1][0]).toBe(4);
-    expect(callback.mock.calls[1][1]).toBe(5);
+    expect(callback.mock.calls[1]?.[0]).toBe(4);
+    expect(callback.mock.calls[1]?.[1]).toBe(5);
   });
 });

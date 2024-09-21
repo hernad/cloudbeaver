@@ -5,27 +5,27 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import '@testing-library/jest-dom';
+import { expect, test } from '@jest/globals';
 
 import { coreClientActivityManifest } from '@cloudbeaver/core-client-activity';
 import { coreEventsManifest } from '@cloudbeaver/core-events';
 import { coreLocalizationManifest } from '@cloudbeaver/core-localization';
 import { coreRootManifest, ServerConfigResource } from '@cloudbeaver/core-root';
-import { createGQLEndpoint } from '@cloudbeaver/core-root/dist/__custom_mocks__/createGQLEndpoint';
-import '@cloudbeaver/core-root/dist/__custom_mocks__/expectWebsocketClosedMessage';
-import { mockAppInit } from '@cloudbeaver/core-root/dist/__custom_mocks__/mockAppInit';
-import { mockGraphQL } from '@cloudbeaver/core-root/dist/__custom_mocks__/mockGraphQL';
-import { mockServerConfig } from '@cloudbeaver/core-root/dist/__custom_mocks__/resolvers/mockServerConfig';
+import { createGQLEndpoint } from '@cloudbeaver/core-root/dist/__custom_mocks__/createGQLEndpoint.js';
+import '@cloudbeaver/core-root/dist/__custom_mocks__/expectWebsocketClosedMessage.js';
+import { mockAppInit } from '@cloudbeaver/core-root/dist/__custom_mocks__/mockAppInit.js';
+import { mockGraphQL } from '@cloudbeaver/core-root/dist/__custom_mocks__/mockGraphQL.js';
+import { mockServerConfig } from '@cloudbeaver/core-root/dist/__custom_mocks__/resolvers/mockServerConfig.js';
 import { coreSDKManifest } from '@cloudbeaver/core-sdk';
 import { coreSettingsManifest } from '@cloudbeaver/core-settings';
 import {
   expectDeprecatedSettingMessage,
   expectNoDeprecatedSettingMessage,
-} from '@cloudbeaver/core-settings/dist/__custom_mocks__/expectDeprecatedSettingMessage';
+} from '@cloudbeaver/core-settings/dist/__custom_mocks__/expectDeprecatedSettingMessage.js';
 import { createApp } from '@cloudbeaver/tests-runner';
 
-import { coreThemingManifest } from './manifest';
-import { ThemeSettingsService } from './ThemeSettingsService';
+import { coreThemingManifest } from './manifest.js';
+import { ThemeSettingsService } from './ThemeSettingsService.js';
 
 const endpoint = createGQLEndpoint();
 const server = mockGraphQL(...mockAppInit(endpoint));
@@ -54,8 +54,8 @@ const newSettings = {
 };
 
 test('New Settings override deprecated settings', async () => {
-  const settings = app.injector.getServiceByClass(ThemeSettingsService);
-  const config = app.injector.getServiceByClass(ServerConfigResource);
+  const settings = app.serviceProvider.getService(ThemeSettingsService);
+  const config = app.serviceProvider.getService(ServerConfigResource);
 
   server.use(endpoint.query('serverConfig', mockServerConfig(newSettings)));
 
@@ -66,8 +66,8 @@ test('New Settings override deprecated settings', async () => {
 });
 
 test('Deprecated settings are used if new settings are not defined', async () => {
-  const settings = app.injector.getServiceByClass(ThemeSettingsService);
-  const config = app.injector.getServiceByClass(ServerConfigResource);
+  const settings = app.serviceProvider.getService(ThemeSettingsService);
+  const config = app.serviceProvider.getService(ServerConfigResource);
 
   server.use(endpoint.query('serverConfig', mockServerConfig(deprecatedSettings)));
 

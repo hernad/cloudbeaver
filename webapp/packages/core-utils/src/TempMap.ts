@@ -7,8 +7,8 @@
  */
 import { action, makeObservable, observable } from 'mobx';
 
-import { cacheValue, ICachedValueObject } from './cacheValue';
-import { combineITerableIterators } from './combineITerableIterators';
+import { cacheValue, type ICachedValueObject } from './cacheValue.js';
+import { combineITerableIterators } from './combineITerableIterators.js';
 
 export class TempMap<TKey, TValue> implements Map<TKey, TValue> {
   get size(): number {
@@ -30,7 +30,10 @@ export class TempMap<TKey, TValue> implements Map<TKey, TValue> {
   private readonly valuesTemp: ICachedValueObject<TValue[]>;
   private readonly entriesTemp: ICachedValueObject<[TKey, TValue][]>;
 
-  constructor(private readonly target: Map<TKey, TValue>, private readonly onSync?: () => void) {
+  constructor(
+    private readonly target: Map<TKey, TValue>,
+    private readonly onSync?: () => void,
+  ) {
     this.temp = new Map();
     this.flushTask = null;
     this.deleted = new Map();

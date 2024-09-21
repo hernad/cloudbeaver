@@ -6,15 +6,15 @@
  * you may not use this file except in compliance with the License.
  */
 import { observer } from 'mobx-react-lite';
-import React, { useEffect } from 'react';
 
 import { s } from '@cloudbeaver/core-blocks';
+import { useDataContextLink } from '@cloudbeaver/core-data-context';
 import { MenuBar, MenuBarItemStyles } from '@cloudbeaver/core-ui';
 import { useMenu } from '@cloudbeaver/core-view';
 
-import { DATA_CONTEXT_SQL_EDITOR_STATE } from '../../DATA_CONTEXT_SQL_EDITOR_STATE';
-import type { ISqlEditorTabState } from '../../ISqlEditorTabState';
-import { OUTPUT_LOGS_MENU } from './OUTPUT_LOGS_MENU';
+import { DATA_CONTEXT_SQL_EDITOR_STATE } from '../../DATA_CONTEXT_SQL_EDITOR_STATE.js';
+import type { ISqlEditorTabState } from '../../ISqlEditorTabState.js';
+import { OUTPUT_LOGS_MENU } from './OUTPUT_LOGS_MENU.js';
 import styles from './OutputLogsMenu.module.css';
 
 interface Props {
@@ -26,15 +26,15 @@ export const OutputLogsMenu = observer<Props>(function OutputLogsMenu({ sqlEdito
     menu: OUTPUT_LOGS_MENU,
   });
 
-  useEffect(() => {
-    menu.context.set(DATA_CONTEXT_SQL_EDITOR_STATE, sqlEditorTabState);
-  }, []);
+  useDataContextLink(menu.context, (context, id) => {
+    context.set(DATA_CONTEXT_SQL_EDITOR_STATE, sqlEditorTabState, id);
+  });
 
   return (
     <MenuBar
       menu={menu}
       nestedMenuSettings={{ modal: true, placement: 'top-start' }}
-      className={s(styles, { menuBar: true }, MenuBarItemStyles.floating)}
+      className={s(styles, { menuBar: true }, MenuBarItemStyles['floating'])}
     />
   );
 });

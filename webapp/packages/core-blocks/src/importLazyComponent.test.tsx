@@ -5,13 +5,14 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
+import { describe, expect, it, jest } from '@jest/globals';
 import { render, screen, waitFor } from '@testing-library/react';
 import React, { Suspense } from 'react';
 
 import { addKnownError, consoleSpy } from '@cloudbeaver/tests-runner';
 
-import ErrorBoundary from './__custom__mocks__/ErrorBoundaryMock';
-import { importLazyComponent } from './importLazyComponent';
+import ErrorBoundary from './__custom__mocks__/ErrorBoundaryMock.js';
+import { importLazyComponent } from './importLazyComponent.js';
 
 addKnownError(/The above error occurred in one of your React components.*/);
 

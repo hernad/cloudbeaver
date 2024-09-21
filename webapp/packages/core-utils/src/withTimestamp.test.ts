@@ -5,7 +5,9 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import { withTimestamp } from './withTimestamp';
+import { describe, expect, it, jest } from '@jest/globals';
+
+import { withTimestamp } from './withTimestamp.js';
 
 describe('withTimestamp', () => {
   it('should generate a value with timestamp at the end', () => {

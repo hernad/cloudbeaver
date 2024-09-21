@@ -5,7 +5,9 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import { isArraysEqual } from './isArraysEqual';
+import { describe, expect, jest, test } from '@jest/globals';
+
+import { isArraysEqual } from './isArraysEqual.js';
 
 describe('Is array equals', () => {
   test('should return "true" when arrays are the same', () => {

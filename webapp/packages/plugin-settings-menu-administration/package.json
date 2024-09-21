@@ -1,5 +1,6 @@
 {
   "name": "@cloudbeaver/plugin-settings-menu-administration",
+  "type": "module",
   "sideEffects": [
     "src/**/*.css",
     "src/**/*.scss",
@@ -13,7 +14,6 @@
     "build": "tsc -b",
     "clean": "rimraf --glob dist",
     "lint": "eslint ./src/ --ext .ts,.tsx",
-    "lint-fix": "eslint ./src/ --ext .ts,.tsx --fix",
     "validate-dependencies": "core-cli-validate-dependencies",
     "update-ts-references": "yarn run clean && typescript-resolve-references"
   },

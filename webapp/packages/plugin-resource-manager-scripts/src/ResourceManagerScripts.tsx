@@ -7,20 +7,20 @@
  */
 import { observer } from 'mobx-react-lite';
 
-import { Container, useTranslate } from '@cloudbeaver/core-blocks';
+import { Flex, useTranslate } from '@cloudbeaver/core-blocks';
 import type { TabContainerPanelComponent } from '@cloudbeaver/core-ui';
 import { ResourceManagerTree } from '@cloudbeaver/plugin-navigation-tree-rm';
 
-import { SCRIPTS_TYPE_ID } from './SCRIPTS_TYPE_ID';
+import { SCRIPTS_TYPE_ID } from './SCRIPTS_TYPE_ID.js';
 
 export const ResourceManagerScripts: TabContainerPanelComponent = observer(function ResourceManagerScripts() {
   const translate = useTranslate();
 
   return (
-    <Container vertical overflow>
+    <Flex direction="column" overflow>
       <ResourceManagerTree resourceTypeId={SCRIPTS_TYPE_ID}>
         {translate('plugin_resource_manager_scripts_no_resources_placeholder')}
       </ResourceManagerTree>
-    </Container>
+    </Flex>
   );
 });

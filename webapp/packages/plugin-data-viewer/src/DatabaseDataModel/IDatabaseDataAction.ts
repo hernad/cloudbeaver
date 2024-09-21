@@ -7,8 +7,8 @@
  */
 import type { ResultDataFormat } from '@cloudbeaver/core-sdk';
 
-import type { IDatabaseDataResult } from './IDatabaseDataResult';
-import type { IDatabaseDataSource } from './IDatabaseDataSource';
+import type { IDatabaseDataResult } from './IDatabaseDataResult.js';
+import type { IDatabaseDataSource } from './IDatabaseDataSource.js';
 
 type AbstractConstructorFunction<
   TOptions,
@@ -41,7 +41,6 @@ export type IDatabaseDataActionClass<
 
 export interface IDatabaseDataAction<TOptions, TResult extends IDatabaseDataResult> {
   readonly source: IDatabaseDataSource<TOptions, TResult>;
-  readonly empty: boolean;
   result: TResult;
   resultIndex: number;
   updateResult: (result: TResult, index: number) => void;

@@ -5,8 +5,10 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import { CancellablePromise } from './CancellablePromise';
-import { PromiseCancelledError } from './PromiseCancelledError';
+import { describe, expect, it, jest } from '@jest/globals';
+
+import { CancellablePromise } from './CancellablePromise.js';
+import { PromiseCancelledError } from './PromiseCancelledError.js';
 
 describe('CancellablePromise', () => {
   jest.mock('./PromiseCancelledError', () => ({

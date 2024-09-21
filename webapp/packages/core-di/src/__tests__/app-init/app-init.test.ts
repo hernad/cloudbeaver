@@ -5,19 +5,21 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import { App } from '../../App';
-import { manifest } from './manifest';
-import { TestBootstrap } from './TestBootstrap';
-import { TestService } from './TestService';
+import { expect, test } from '@jest/globals';
+
+import { App } from '../../App.js';
+import { manifest } from './manifest.js';
+import { TestBootstrap } from './TestBootstrap.js';
+import { TestService } from './TestService.js';
 
 test('App Initialization', async () => {
   const app = new App([manifest]);
-  const injector = app.getServiceInjector();
+  const serviceProvider = app.getServiceProvider();
 
   await (app as any).registerServices();
 
-  const service = injector.getServiceByClass(TestService);
-  const bootstrap = injector.getServiceByClass(TestBootstrap);
+  const service = serviceProvider.getService(TestService);
+  const bootstrap = serviceProvider.getService(TestBootstrap);
 
   expect(service).toBeInstanceOf(TestService);
   expect(service.sum(1, 2)).toBe(3);

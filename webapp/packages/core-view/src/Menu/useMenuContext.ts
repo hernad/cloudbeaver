@@ -7,22 +7,25 @@
  */
 import { useContext } from 'react';
 
-import { type IDataContext, useDataContext } from '@cloudbeaver/core-data-context';
+import { type IDataContext, useDataContext, useDataContextLink } from '@cloudbeaver/core-data-context';
 
-import { DATA_CONTEXT_LOADABLE_STATE, loadableStateContext } from '../LoadableStateContext/DATA_CONTEXT_LOADABLE_STATE';
-import { CaptureViewContext } from '../View/CaptureViewContext';
-import { DATA_CONTEXT_MENU } from './DATA_CONTEXT_MENU';
-import type { IMenu } from './IMenu';
+import { DATA_CONTEXT_LOADABLE_STATE, loadableStateContext } from '../LoadableStateContext/DATA_CONTEXT_LOADABLE_STATE.js';
+import { CaptureViewContext } from '../View/CaptureViewContext.js';
+import { DATA_CONTEXT_MENU } from './DATA_CONTEXT_MENU.js';
+import type { IMenu } from './IMenu.js';
 
 export function useMenuContext(menu: IMenu, _menuContext?: IDataContext): IDataContext {
   const viewContext = useContext(CaptureViewContext);
   const context = useDataContext(_menuContext || viewContext);
+  const hasLoadableState = context.hasOwn(DATA_CONTEXT_LOADABLE_STATE);
 
-  context.set(DATA_CONTEXT_MENU, menu);
+  useDataContextLink(context, (context, id) => {
+    context.set(DATA_CONTEXT_MENU, menu, id);
 
-  if (!context.has(DATA_CONTEXT_LOADABLE_STATE, false)) {
-    context.set(DATA_CONTEXT_LOADABLE_STATE, loadableStateContext());
-  }
+    if (!hasLoadableState) {
+      context.set(DATA_CONTEXT_LOADABLE_STATE, loadableStateContext(), id);
+    }
+  });
 
   return context;
 }

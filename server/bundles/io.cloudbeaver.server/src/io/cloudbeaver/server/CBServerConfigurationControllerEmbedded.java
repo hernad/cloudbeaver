@@ -19,7 +19,8 @@ package io.cloudbeaver.server;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.InstanceCreator;
-import io.cloudbeaver.service.security.db.WebDatabaseConfig;
+import io.cloudbeaver.model.config.CBServerConfig;
+import io.cloudbeaver.model.config.WebDatabaseConfig;
 import org.jkiss.code.NotNull;
 import org.jkiss.dbeaver.Log;
 import org.jkiss.dbeaver.model.data.json.JSONUtils;
@@ -43,13 +44,10 @@ public class CBServerConfigurationControllerEmbedded<T extends CBServerConfig> e
     @NotNull
     @Override
     protected Map<String, Object> collectServerConfigProperties(
-        String newServerName,
-        String newServerURL,
-        long sessionExpireTime,
-        Map<String, Object> originServerConfig
+        @NotNull CBServerConfig serverConfig,
+        @NotNull Map<String, Object> originServerConfig
     ) {
-        Map<String, Object> serverConfigProperties = super.collectServerConfigProperties(
-            newServerName, newServerURL, sessionExpireTime, originServerConfig);
+        Map<String, Object> serverConfigProperties = super.collectServerConfigProperties(serverConfig, originServerConfig);
 
         var databaseConfigProperties = new LinkedHashMap<String, Object>();
         Map<String, Object> oldRuntimeDBConfig = JSONUtils.getObject(originServerConfig,

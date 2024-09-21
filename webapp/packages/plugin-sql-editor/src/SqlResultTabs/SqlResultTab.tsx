@@ -8,12 +8,12 @@
 import { observer } from 'mobx-react-lite';
 import { useContext } from 'react';
 
-import { useDataContext } from '@cloudbeaver/core-data-context';
-import { ITabData, Tab, TabIcon, TabTitle } from '@cloudbeaver/core-ui';
+import { useDataContext, useDataContextLink } from '@cloudbeaver/core-data-context';
+import { type ITabData, Tab, TabIcon, TabTitle } from '@cloudbeaver/core-ui';
 import { CaptureViewContext } from '@cloudbeaver/core-view';
 
-import type { ISqlEditorResultTab } from '../ISqlEditorTabState';
-import { DATA_CONTEXT_SQL_EDITOR_RESULT_ID } from './DATA_CONTEXT_SQL_EDITOR_RESULT_ID';
+import type { ISqlEditorResultTab } from '../ISqlEditorTabState.js';
+import { DATA_CONTEXT_SQL_EDITOR_RESULT_ID } from './DATA_CONTEXT_SQL_EDITOR_RESULT_ID.js';
 
 interface Props {
   result: ISqlEditorResultTab;
@@ -25,7 +25,9 @@ export const SqlResultTab = observer<Props>(function SqlResultTab({ result, clas
   const viewContext = useContext(CaptureViewContext);
   const tabMenuContext = useDataContext(viewContext);
 
-  tabMenuContext.set(DATA_CONTEXT_SQL_EDITOR_RESULT_ID, result);
+  useDataContextLink(tabMenuContext, (context, id) => {
+    context.set(DATA_CONTEXT_SQL_EDITOR_RESULT_ID, result, id);
+  });
 
   return (
     <Tab key={result.id} tabId={result.id} title={result.name} menuContext={tabMenuContext} className={className} onClose={onClose}>

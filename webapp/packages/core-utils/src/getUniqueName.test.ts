@@ -5,7 +5,9 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import { getUniqueName } from './getUniqueName';
+import { describe, expect, test } from '@jest/globals';
+
+import { getUniqueName } from './getUniqueName.js';
 
 describe('Get unique name', () => {
   test('should return "name (1)" when "name" is passed and "name" is presented', () => {

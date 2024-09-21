@@ -5,7 +5,9 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import { removeLineBreak } from './removeLineBreak';
+import { describe, expect, it } from '@jest/globals';
+
+import { removeLineBreak } from './removeLineBreak.js';
 
 describe('removeLineBreak', () => {
   it('should remove line break characters from a string', () => {

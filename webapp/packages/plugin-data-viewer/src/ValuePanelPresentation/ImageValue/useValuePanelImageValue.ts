@@ -13,25 +13,27 @@ import { useService } from '@cloudbeaver/core-di';
 import { NotificationService } from '@cloudbeaver/core-events';
 import { download, getMIME, isImageFormat, isValidUrl } from '@cloudbeaver/core-utils';
 
-import { createResultSetBlobValue } from '../../DatabaseDataModel/Actions/ResultSet/createResultSetBlobValue';
-import type { IResultSetElementKey } from '../../DatabaseDataModel/Actions/ResultSet/IResultSetDataKey';
-import { isResultSetBinaryValue } from '../../DatabaseDataModel/Actions/ResultSet/isResultSetBinaryValue';
-import { isResultSetBlobValue } from '../../DatabaseDataModel/Actions/ResultSet/isResultSetBlobValue';
-import { isResultSetFileValue } from '../../DatabaseDataModel/Actions/ResultSet/isResultSetFileValue';
-import { ResultSetDataContentAction } from '../../DatabaseDataModel/Actions/ResultSet/ResultSetDataContentAction';
-import { ResultSetEditAction } from '../../DatabaseDataModel/Actions/ResultSet/ResultSetEditAction';
-import { ResultSetFormatAction } from '../../DatabaseDataModel/Actions/ResultSet/ResultSetFormatAction';
-import { ResultSetSelectAction } from '../../DatabaseDataModel/Actions/ResultSet/ResultSetSelectAction';
-import type { IDatabaseDataModel } from '../../DatabaseDataModel/IDatabaseDataModel';
-import type { IDatabaseResultSet } from '../../DatabaseDataModel/IDatabaseResultSet';
+import { createResultSetBlobValue } from '../../DatabaseDataModel/Actions/ResultSet/createResultSetBlobValue.js';
+import type { IResultSetElementKey } from '../../DatabaseDataModel/Actions/ResultSet/IResultSetDataKey.js';
+import { isResultSetBinaryValue } from '../../DatabaseDataModel/Actions/ResultSet/isResultSetBinaryValue.js';
+import { isResultSetBlobValue } from '../../DatabaseDataModel/Actions/ResultSet/isResultSetBlobValue.js';
+import { isResultSetFileValue } from '../../DatabaseDataModel/Actions/ResultSet/isResultSetFileValue.js';
+import { ResultSetDataContentAction } from '../../DatabaseDataModel/Actions/ResultSet/ResultSetDataContentAction.js';
+import { ResultSetEditAction } from '../../DatabaseDataModel/Actions/ResultSet/ResultSetEditAction.js';
+import { ResultSetFormatAction } from '../../DatabaseDataModel/Actions/ResultSet/ResultSetFormatAction.js';
+import { ResultSetSelectAction } from '../../DatabaseDataModel/Actions/ResultSet/ResultSetSelectAction.js';
+import type { IDatabaseDataModel } from '../../DatabaseDataModel/IDatabaseDataModel.js';
+import { DataViewerService } from '../../DataViewerService.js';
+import { ResultSetDataSource } from '../../ResultSet/ResultSetDataSource.js';
 
 interface Props {
-  model: IDatabaseDataModel<any, IDatabaseResultSet>;
+  model: IDatabaseDataModel<ResultSetDataSource>;
   resultIndex: number;
 }
 
 export function useValuePanelImageValue({ model, resultIndex }: Props) {
   const notificationService = useService(NotificationService);
+  const dataViewerService = useService(DataViewerService);
   const selectAction = model.source.getAction(resultIndex, ResultSetSelectAction);
   const formatAction = model.source.getAction(resultIndex, ResultSetFormatAction);
   const contentAction = model.source.getAction(resultIndex, ResultSetDataContentAction);
@@ -88,6 +90,10 @@ export function useValuePanelImageValue({ model, resultIndex }: Props) {
         return this.contentAction.retrieveBlobFromCache(this.selectedCell);
       },
       get canSave() {
+        if (!this.dataViewerService.canExportData) {
+          return false;
+        }
+
         if (this.truncated && this.selectedCell) {
           return this.contentAction.isDownloadable(this.selectedCell);
         }
@@ -158,6 +164,6 @@ export function useValuePanelImageValue({ model, resultIndex }: Props) {
       upload: action.bound,
       loadFullImage: action.bound,
     },
-    { model, resultIndex, notificationService, selectAction, formatAction, contentAction, editAction },
+    { model, resultIndex, notificationService, selectAction, formatAction, contentAction, editAction, dataViewerService },
   );
 }

@@ -21,8 +21,6 @@ import io.cloudbeaver.WebProjectImpl;
 import io.cloudbeaver.WebSessionProjectImpl;
 import io.cloudbeaver.model.log.SLF4JLogHandler;
 import io.cloudbeaver.model.session.WebSession;
-import io.cloudbeaver.server.WebGlobalWorkspace;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.jkiss.code.NotNull;
@@ -30,18 +28,17 @@ import org.jkiss.code.Nullable;
 import org.jkiss.dbeaver.DBException;
 import org.jkiss.dbeaver.Log;
 import org.jkiss.dbeaver.model.DBFileController;
-import org.jkiss.dbeaver.model.app.DBPPlatform;
 import org.jkiss.dbeaver.model.app.DBPWorkspace;
 import org.jkiss.dbeaver.model.auth.SMCredentialsProvider;
 import org.jkiss.dbeaver.model.auth.SMSessionContext;
 import org.jkiss.dbeaver.model.data.json.JSONUtils;
 import org.jkiss.dbeaver.model.impl.app.ApplicationRegistry;
+import org.jkiss.dbeaver.model.impl.app.BaseApplicationImpl;
+import org.jkiss.dbeaver.model.impl.app.BaseWorkspaceImpl;
 import org.jkiss.dbeaver.model.rm.RMController;
 import org.jkiss.dbeaver.model.rm.RMProject;
 import org.jkiss.dbeaver.model.secret.DBSSecretController;
 import org.jkiss.dbeaver.model.websocket.event.WSEventController;
-import org.jkiss.dbeaver.registry.BaseApplicationImpl;
-import org.jkiss.dbeaver.registry.BaseWorkspaceImpl;
 import org.jkiss.dbeaver.runtime.IVariableResolver;
 import org.jkiss.dbeaver.utils.GeneralUtils;
 import org.jkiss.dbeaver.utils.RuntimeUtils;
@@ -62,16 +59,9 @@ public abstract class BaseWebApplication extends BaseApplicationImpl implements 
     public static final String CLI_PARAM_WEB_CONFIG = "-web-config";
     public static final String LOGBACK_FILE_NAME = "logback.xml";
 
-
     private static final Log log = Log.getLog(BaseWebApplication.class);
 
     private String instanceId;
-
-    @NotNull
-    @Override
-    public DBPWorkspace createWorkspace(@NotNull DBPPlatform platform, @NotNull IWorkspace eclipseWorkspace) {
-        return new WebGlobalWorkspace(platform, eclipseWorkspace);
-    }
 
     @Override
     public RMController createResourceController(
@@ -105,16 +95,7 @@ public abstract class BaseWebApplication extends BaseApplicationImpl implements 
 
     protected boolean loadServerConfiguration() throws DBException {
         Path configFilePath = getMainConfigurationFilePath().toAbsolutePath();
-        Path configFolder = configFilePath.getParent();
 
-        // Configure logging
-        Path logbackConfigPath = getLogbackConfigPath(configFolder);
-
-        if (logbackConfigPath == null) {
-            System.err.println("Can't find slf4j configuration file in " + configFilePath.getParent());
-        } else {
-            System.setProperty("logback.configurationFile", logbackConfigPath.toString());
-        }
         Log.setLogHandler(new SLF4JLogHandler());
 
         // Load config file
@@ -210,7 +191,9 @@ public abstract class BaseWebApplication extends BaseApplicationImpl implements 
     }
 
     @SuppressWarnings("unchecked")
-    public static void patchConfigurationWithProperties(Map<String, Object> configProps, IVariableResolver varResolver) {
+    public static void patchConfigurationWithProperties(
+        Map<String, Object> configProps, IVariableResolver varResolver
+    ) {
         for (Map.Entry<String, Object> entry : configProps.entrySet()) {
             Object propValue = entry.getValue();
             if (propValue instanceof String) {

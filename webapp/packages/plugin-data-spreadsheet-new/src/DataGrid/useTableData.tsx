@@ -8,27 +8,26 @@
 import { computed, observable } from 'mobx';
 
 import { useObservableRef } from '@cloudbeaver/core-blocks';
+import type { Column } from '@cloudbeaver/plugin-data-grid';
 import {
-  IDatabaseDataModel,
-  IDatabaseResultSet,
-  IResultSetColumnKey,
-  IResultSetElementKey,
-  IResultSetRowKey,
-  ResultSetConstraintAction,
+  type IDatabaseDataModel,
+  type IResultSetColumnKey,
+  type IResultSetElementKey,
+  type IResultSetRowKey,
   ResultSetDataAction,
   ResultSetDataContentAction,
   ResultSetDataKeysUtils,
+  ResultSetDataSource,
   ResultSetEditAction,
   ResultSetFormatAction,
   ResultSetViewAction,
 } from '@cloudbeaver/plugin-data-viewer';
-import type { Column } from '@cloudbeaver/plugin-react-data-grid';
 
-import { IndexFormatter } from './Formatters/IndexFormatter';
-import { TableColumnHeader } from './TableColumnHeader/TableColumnHeader';
-import { TableIndexColumnHeader } from './TableColumnHeader/TableIndexColumnHeader';
-import type { ITableData } from './TableDataContext';
-import { useTableDataMeasurements } from './useTableDataMeasurements';
+import { IndexFormatter } from './Formatters/IndexFormatter.js';
+import { TableColumnHeader } from './TableColumnHeader/TableColumnHeader.js';
+import { TableIndexColumnHeader } from './TableColumnHeader/TableIndexColumnHeader.js';
+import type { ITableData } from './TableDataContext.js';
+import { useTableDataMeasurements } from './useTableDataMeasurements.js';
 
 export const indexColumn: Column<IResultSetRowKey, any> = {
   key: 'index',
@@ -43,7 +42,7 @@ export const indexColumn: Column<IResultSetRowKey, any> = {
 };
 
 export function useTableData(
-  model: IDatabaseDataModel<any, IDatabaseResultSet>,
+  model: IDatabaseDataModel<ResultSetDataSource>,
   resultIndex: number,
   gridDIVElement: React.RefObject<HTMLDivElement | null>,
 ): ITableData {
@@ -53,7 +52,6 @@ export function useTableData(
   const editor = model.source.getAction(resultIndex, ResultSetEditAction);
   const view = model.source.getAction(resultIndex, ResultSetViewAction);
   const dataContent = model.source.getAction(resultIndex, ResultSetDataContentAction);
-  const constraints = model.source.getAction(resultIndex, ResultSetConstraintAction);
 
   return useObservableRef<ITableData & { gridDIVElement: React.RefObject<HTMLDivElement | null> }>(
     () => ({
@@ -91,7 +89,7 @@ export function useTableData(
 
         let left = 0;
         for (let i = 0; i < columnIndex; i++) {
-          const column = this.columns[i];
+          const column = this.columns[i]!;
           left += column.width as number;
         }
 
@@ -127,9 +125,9 @@ export function useTableData(
       getRowIndexFromKey(rowKey) {
         return this.rows.findIndex(row => ResultSetDataKeysUtils.isEqual(rowKey, row));
       },
-      getColumnsInRange(startIndex, endIndex) {
+      getColumnsInRange(startIndex, endIndex): Column<IResultSetRowKey, any>[] {
         if (startIndex === endIndex) {
-          return [this.columns[startIndex]];
+          return [this.columns[startIndex]!];
         }
 
         const firstIndex = Math.min(startIndex, endIndex);
@@ -173,7 +171,6 @@ export function useTableData(
       data: observable.ref,
       editor: observable.ref,
       view: observable.ref,
-      constraints: observable.ref,
       gridDIVElement: observable.ref,
     },
     {
@@ -182,7 +179,6 @@ export function useTableData(
       data,
       editor,
       view,
-      constraints,
       gridDIVElement,
     },
   );

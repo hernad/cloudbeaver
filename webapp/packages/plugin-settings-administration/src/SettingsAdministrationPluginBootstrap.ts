@@ -9,8 +9,8 @@ import { AdministrationItemService, AdministrationItemType } from '@cloudbeaver/
 import { importLazyComponent } from '@cloudbeaver/core-blocks';
 import { Bootstrap, injectable } from '@cloudbeaver/core-di';
 
-const SettingsAdministration = importLazyComponent(() => import('./SettingsAdministration').then(module => module.SettingsAdministration));
-const SettingsDrawerItem = importLazyComponent(() => import('./SettingsDrawerItem').then(module => module.SettingsDrawerItem));
+const SettingsAdministration = importLazyComponent(() => import('./SettingsAdministration.js').then(module => module.SettingsAdministration));
+const SettingsDrawerItem = importLazyComponent(() => import('./SettingsDrawerItem.js').then(module => module.SettingsDrawerItem));
 
 @injectable()
 export class SettingsAdministrationPluginBootstrap extends Bootstrap {
@@ -18,15 +18,13 @@ export class SettingsAdministrationPluginBootstrap extends Bootstrap {
     super();
   }
 
-  register(): void | Promise<void> {
+  override register(): void | Promise<void> {
     this.administrationItemService.create({
       name: 'settings',
       type: AdministrationItemType.Administration,
-      order: 2.2,
+      order: 3,
       getContentComponent: () => SettingsAdministration,
       getDrawerComponent: () => SettingsDrawerItem,
     });
   }
-
-  load(): void | Promise<void> {}
 }

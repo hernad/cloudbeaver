@@ -7,20 +7,20 @@
  */
 import type { IDataContextProvider } from '@cloudbeaver/core-data-context';
 import { injectable } from '@cloudbeaver/core-di';
-import { flat, ILoadableState, isNotNullDefined } from '@cloudbeaver/core-utils';
+import { flat, type ILoadableState, isNotNullDefined } from '@cloudbeaver/core-utils';
 
-import { ActionService } from '../Action/ActionService';
-import { isAction } from '../Action/createAction';
-import type { IAction } from '../Action/IAction';
-import { isMenu } from './createMenu';
-import { DATA_CONTEXT_MENU } from './DATA_CONTEXT_MENU';
-import { DATA_CONTEXT_MENU_NESTED } from './DATA_CONTEXT_MENU_NESTED';
-import type { IMenuHandler, IMenuHandlerOptions } from './IMenuHandler';
-import type { IMenuItemsCreator, IMenuItemsCreatorOptions, MenuCreatorItem } from './IMenuItemsCreator';
-import type { IMenuActionItem } from './MenuItem/IMenuActionItem';
-import type { IMenuItem } from './MenuItem/IMenuItem';
-import { MenuActionItem } from './MenuItem/MenuActionItem';
-import { MenuSubMenuItem } from './MenuItem/MenuSubMenuItem';
+import { ActionService } from '../Action/ActionService.js';
+import { isAction } from '../Action/createAction.js';
+import type { IAction } from '../Action/IAction.js';
+import { isMenu } from './createMenu.js';
+import { DATA_CONTEXT_MENU } from './DATA_CONTEXT_MENU.js';
+import { DATA_CONTEXT_MENU_NESTED } from './DATA_CONTEXT_MENU_NESTED.js';
+import type { IMenuHandler, IMenuHandlerOptions } from './IMenuHandler.js';
+import type { IMenuItemsCreator, IMenuItemsCreatorOptions, MenuCreatorItem } from './IMenuItemsCreator.js';
+import type { IMenuActionItem } from './MenuItem/IMenuActionItem.js';
+import type { IMenuItem } from './MenuItem/IMenuItem.js';
+import { MenuActionItem } from './MenuItem/MenuActionItem.js';
+import { MenuSubMenuItem } from './MenuItem/MenuSubMenuItem.js';
 
 @injectable()
 export class MenuService {
@@ -70,11 +70,9 @@ export class MenuService {
           continue;
         }
       }
-      if (handler.contexts.size > 0) {
-        for (const context of handler.contexts) {
-          if (!contexts.has(context, true)) {
-            continue handlers;
-          }
+      for (const context of handler.contexts) {
+        if (!contexts.has(context)) {
+          continue handlers;
         }
       }
       if (handler.isApplicable?.(contexts) !== false) {
@@ -133,7 +131,10 @@ export class MenuService {
           return this.createActionItem(context, item) as IMenuItem;
         }
         if (isMenu(item)) {
-          return new MenuSubMenuItem({ menu: item }) as IMenuItem;
+          return new MenuSubMenuItem({
+            menu: item,
+            action: (isAction(item.action) ? this.createActionItem(context, item.action) : undefined) || undefined,
+          }) as IMenuItem;
         }
         return item;
       })
@@ -156,7 +157,7 @@ function filterApplicable(contexts: IDataContextProvider): (creator: IMenuItemsC
 
     if (creator.contexts.size > 0) {
       for (const context of creator.contexts) {
-        if (!contexts.has(context, true)) {
+        if (!contexts.has(context)) {
           return false;
         }
       }

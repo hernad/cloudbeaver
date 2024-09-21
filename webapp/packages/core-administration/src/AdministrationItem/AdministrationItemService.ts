@@ -8,13 +8,18 @@
 import { makeObservable, observable } from 'mobx';
 
 import { injectable } from '@cloudbeaver/core-di';
-import { Executor, IExecutor, IExecutorHandler } from '@cloudbeaver/core-executor';
+import { Executor, type IExecutor, type IExecutorHandler } from '@cloudbeaver/core-executor';
 import type { RouterState } from '@cloudbeaver/core-routing';
 
-import { filterConfigurationWizard } from './filterConfigurationWizard';
-import { AdministrationItemType, IAdministrationItem, IAdministrationItemOptions, IAdministrationItemSubItem } from './IAdministrationItem';
-import type { IAdministrationItemRoute } from './IAdministrationItemRoute';
-import { orderAdministrationItems } from './orderAdministrationItems';
+import { filterConfigurationWizard } from './filterConfigurationWizard.js';
+import {
+  AdministrationItemType,
+  type IAdministrationItem,
+  type IAdministrationItemOptions,
+  type IAdministrationItemSubItem,
+} from './IAdministrationItem.js';
+import type { IAdministrationItemRoute } from './IAdministrationItemRoute.js';
+import { orderAdministrationItems } from './orderAdministrationItems.js';
 
 interface IActivationData {
   screen: IAdministrationItemRoute;
@@ -112,14 +117,14 @@ export class AdministrationItemService {
       return onlyActive.name;
     }
 
-    return items[0].name;
+    return items[0]?.name || null;
   }
 
   getAdministrationItemRoute(state: RouterState, configurationMode = false): IAdministrationItemRoute {
     return {
-      item: state.params.item || this.getDefaultItem(configurationMode),
-      sub: state.params.sub || null,
-      param: state.params.param || null,
+      item: state.params['item'] || this.getDefaultItem(configurationMode),
+      sub: state.params['sub'] || null,
+      param: state.params['param'] || null,
     };
   }
 
@@ -142,7 +147,7 @@ export class AdministrationItemService {
     return sub;
   }
 
-  create(options: IAdministrationItemOptions): void {
+  create(options: IAdministrationItemOptions): IAdministrationItem {
     const type = options.type ?? AdministrationItemType.Administration;
 
     const existedIndex = this.items.findIndex(
@@ -160,7 +165,9 @@ export class AdministrationItemService {
       sub: options.sub ?? [],
       order: options.order ?? Number.MAX_SAFE_INTEGER,
     };
-    this.items.push(item);
+    const index = this.items.push(item);
+
+    return this.items[index - 1]!;
   }
 
   async activate(screen: IAdministrationItemRoute, configurationWizard: boolean, outside: boolean, outsideAdminPage: boolean): Promise<void> {
@@ -239,7 +246,7 @@ export class AdministrationItemService {
         if (item === items.length) {
           break;
         }
-        await items[item].configurationWizardOptions?.onLoad?.();
+        await items[item]?.configurationWizardOptions?.onLoad?.();
         item++;
       }
     }

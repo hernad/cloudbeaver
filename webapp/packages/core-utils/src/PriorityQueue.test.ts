@@ -5,7 +5,9 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import { PriorityQueue } from './PriorityQueue';
+import { beforeEach, describe, expect, it } from '@jest/globals';
+
+import { PriorityQueue } from './PriorityQueue.js';
 
 describe('PriorityQueue', () => {
   let queue: PriorityQueue;

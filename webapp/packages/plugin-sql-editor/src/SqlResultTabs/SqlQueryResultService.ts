@@ -7,10 +7,10 @@
  */
 import { injectable } from '@cloudbeaver/core-di';
 import { uuid } from '@cloudbeaver/core-utils';
-import { IDatabaseDataModel, IDatabaseResultSet, ResultSetDataSource, TableViewerStorageService } from '@cloudbeaver/plugin-data-viewer';
+import { type IDatabaseDataModel, TableViewerStorageService } from '@cloudbeaver/plugin-data-viewer';
 
-import type { IResultGroup, IResultTab, ISqlEditorTabState, IStatisticsTab } from '../ISqlEditorTabState';
-import type { IDataQueryOptions } from '../QueryDataSource';
+import type { IResultGroup, IResultTab, ISqlEditorTabState, IStatisticsTab } from '../ISqlEditorTabState.js';
+import type { QueryDataSource } from '../QueryDataSource.js';
 
 @injectable()
 export class SqlQueryResultService {
@@ -41,7 +41,7 @@ export class SqlQueryResultService {
 
   updateGroupTabs(
     editorState: ISqlEditorTabState,
-    model: IDatabaseDataModel<IDataQueryOptions, IDatabaseResultSet>,
+    model: IDatabaseDataModel<QueryDataSource>,
     groupId: string,
     selectFirstResult?: boolean,
     resultCount?: number,
@@ -136,14 +136,7 @@ export class SqlQueryResultService {
       const model = this.tableViewerStorageService.get(group.modelId);
 
       if (model) {
-        let canClose = false;
-
-        try {
-          await model.requestDataAction(() => {
-            canClose = true;
-          });
-        } catch {}
-        return canClose;
+        return await model.source.canSafelyDispose();
       }
     }
     return true;
@@ -162,9 +155,9 @@ export class SqlQueryResultService {
         state.resultGroups.splice(state.resultGroups.indexOf(group), 1);
         const model = this.tableViewerStorageService.get(group.modelId);
 
-        model?.dispose(true);
-
-        this.tableViewerStorageService.remove(group.modelId);
+        model?.dispose().then(() => {
+          this.tableViewerStorageService.remove(group.modelId);
+        });
       }
     }
   }
@@ -179,21 +172,16 @@ export class SqlQueryResultService {
         return a.indexInResultSet - b.indexInResultSet;
       });
 
-    editorState.currentTabId = resultTab[0].tabId;
+    editorState.currentTabId = resultTab[0]!.tabId;
   }
 
   selectFirstResult(editorState: ISqlEditorTabState, groupId: string) {
     const mainTab = editorState.resultTabs.filter(resultTab => resultTab.groupId === groupId).sort((a, b) => a.indexInResultSet - b.indexInResultSet);
 
-    editorState.currentTabId = mainTab[0].tabId;
+    editorState.currentTabId = mainTab[0]!.tabId;
   }
 
-  private createTabsForGroup(
-    state: ISqlEditorTabState,
-    group: IResultGroup,
-    model: IDatabaseDataModel<IDataQueryOptions, IDatabaseResultSet>,
-    resultCount?: number,
-  ) {
+  private createTabsForGroup(state: ISqlEditorTabState, group: IResultGroup, model: IDatabaseDataModel<QueryDataSource>, resultCount?: number) {
     this.createResultTabForGroup(state, group, model, 0, resultCount);
 
     for (let i = 1; i < model.source.results.length; i++) {
@@ -204,7 +192,7 @@ export class SqlQueryResultService {
   private createResultTabForGroup(
     state: ISqlEditorTabState,
     group: IResultGroup,
-    model: IDatabaseDataModel<IDataQueryOptions, IDatabaseResultSet>,
+    model: IDatabaseDataModel<QueryDataSource>,
     indexInResultSet: number,
     resultCount?: number,
   ) {
@@ -228,7 +216,7 @@ export class SqlQueryResultService {
       return;
     }
 
-    state.resultTabs[index] = { ...state.resultTabs[index], ...resultTab };
+    state.resultTabs[index] = { ...state.resultTabs[index]!, ...resultTab };
   }
 
   private createResultTab(state: ISqlEditorTabState, group: IResultGroup, indexInResultSet: number, results: number, resultCount?: number) {

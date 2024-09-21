@@ -9,36 +9,39 @@ import { observer } from 'mobx-react-lite';
 import { useContext } from 'react';
 
 import { IconOrImage, s, useTranslate } from '@cloudbeaver/core-blocks';
-import { Connection, ConnectionInfoResource, createConnectionParam } from '@cloudbeaver/core-connections';
-import { useDataContext } from '@cloudbeaver/core-data-context';
+import { type Connection, ConnectionInfoResource, createConnectionParam } from '@cloudbeaver/core-connections';
+import { useDataContext, useDataContextLink } from '@cloudbeaver/core-data-context';
 import { useService } from '@cloudbeaver/core-di';
-import { ITabData, Tab, TabIcon, TabTitle } from '@cloudbeaver/core-ui';
+import { type ITabData, Tab, TabIcon, TabTitle } from '@cloudbeaver/core-ui';
 import { CaptureViewContext } from '@cloudbeaver/core-view';
 import type { TabHandlerTabComponent } from '@cloudbeaver/plugin-navigation-tabs';
 import {
   DATA_CONTEXT_SQL_EDITOR_STATE,
   ESqlDataSourceFeatures,
   getSqlEditorName,
-  ISqlEditorTabState,
+  type ISqlEditorTabState,
   SqlDataSourceService,
 } from '@cloudbeaver/plugin-sql-editor';
 
-import { DATA_CONTEXT_SQL_EDITOR_TAB } from './DATA_CONTEXT_SQL_EDITOR_TAB';
+import { DATA_CONTEXT_SQL_EDITOR_TAB } from './DATA_CONTEXT_SQL_EDITOR_TAB.js';
 import sqlEditorTabStyles from './SqlEditorTab.module.css';
 
 export const SqlEditorTab: TabHandlerTabComponent<ISqlEditorTabState> = observer(function SqlEditorTab({ tab, onSelect, onClose }) {
   const viewContext = useContext(CaptureViewContext);
   const tabMenuContext = useDataContext(viewContext);
+  const handlerState = tab.handlerState;
 
-  tabMenuContext.set(DATA_CONTEXT_SQL_EDITOR_TAB, true);
-  tabMenuContext.set(DATA_CONTEXT_SQL_EDITOR_STATE, tab.handlerState);
+  useDataContextLink(tabMenuContext, (context, id) => {
+    context.set(DATA_CONTEXT_SQL_EDITOR_TAB, true, id);
+    context.set(DATA_CONTEXT_SQL_EDITOR_STATE, handlerState, id);
+  });
 
   const sqlDataSourceService = useService(SqlDataSourceService);
   const connectionInfo = useService(ConnectionInfoResource);
 
   const translate = useTranslate();
 
-  const dataSource = sqlDataSourceService.get(tab.handlerState.editorId);
+  const dataSource = sqlDataSourceService.get(handlerState.editorId);
   let connection: Connection | undefined;
   const executionContext = dataSource?.executionContext;
 
@@ -46,7 +49,7 @@ export const SqlEditorTab: TabHandlerTabComponent<ISqlEditorTabState> = observer
     connection = connectionInfo.get(createConnectionParam(executionContext.projectId, executionContext.connectionId));
   }
 
-  const name = getSqlEditorName(tab.handlerState, dataSource, connection);
+  const name = getSqlEditorName(handlerState, dataSource, connection);
   const icon = dataSource?.icon ?? '/icons/sql_script_m.svg';
   const saved = dataSource?.isSaved !== false;
   const isScript = dataSource?.hasFeature(ESqlDataSourceFeatures.script);

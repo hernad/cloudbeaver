@@ -5,7 +5,9 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import { isValuesEqual } from './isValuesEqual';
+import { describe, expect, test } from '@jest/globals';
+
+import { isValuesEqual } from './isValuesEqual.js';
 
 describe('Is values equal', () => {
   test('should return "true" when the identical strings are passed', () => {

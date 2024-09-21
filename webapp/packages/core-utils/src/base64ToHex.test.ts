@@ -1,4 +1,13 @@
-import { base64ToHex } from './base64ToHex';
+/*
+ * CloudBeaver - Cloud Database Manager
+ * Copyright (C) 2020-2024 DBeaver Corp and others
+ *
+ * Licensed under the Apache License, Version 2.0.
+ * you may not use this file except in compliance with the License.
+ */
+import { describe, expect, it } from '@jest/globals';
+
+import { base64ToHex } from './base64ToHex.js';
 
 const BASE_64_STRING =
   'iVBORw0KGgoAAAANSUhEUgAAAhAAAAEWCAIAAAC40zleAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAACydSURBVHhe7Z1rsF1VtecnkAcQkhgsjVJlW3xQEcWkeOV5njknhHhCUCAVIOQFQQIHbocgJCGPaum6RXjdEMWU3WmVRxQhXLttbt+riAKBW1QJlerYbW4CX/jiLZUqbvmlu/ph9xhzzNeaa+199pn7PPZa6/+rUTlzjTnmWHPD3uO/51p776n6lq';

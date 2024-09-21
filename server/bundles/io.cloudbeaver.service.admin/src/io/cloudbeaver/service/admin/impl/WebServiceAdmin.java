@@ -22,11 +22,12 @@ import io.cloudbeaver.WebProjectImpl;
 import io.cloudbeaver.WebServiceUtils;
 import io.cloudbeaver.auth.provider.local.LocalAuthProvider;
 import io.cloudbeaver.model.WebPropertyInfo;
+import io.cloudbeaver.model.config.CBAppConfig;
+import io.cloudbeaver.model.config.CBServerConfig;
 import io.cloudbeaver.model.session.WebAuthInfo;
 import io.cloudbeaver.model.session.WebSession;
 import io.cloudbeaver.model.user.WebUser;
 import io.cloudbeaver.registry.*;
-import io.cloudbeaver.server.CBAppConfig;
 import io.cloudbeaver.server.CBApplication;
 import io.cloudbeaver.server.CBConstants;
 import io.cloudbeaver.server.CBPlatform;
@@ -42,6 +43,7 @@ import org.jkiss.dbeaver.model.DBPDataSourceContainer;
 import org.jkiss.dbeaver.model.app.DBPDataSourceRegistry;
 import org.jkiss.dbeaver.model.app.DBPProject;
 import org.jkiss.dbeaver.model.auth.AuthInfo;
+import org.jkiss.dbeaver.model.connection.DBPDriver;
 import org.jkiss.dbeaver.model.navigator.DBNBrowseSettings;
 import org.jkiss.dbeaver.model.preferences.DBPPropertyDescriptor;
 import org.jkiss.dbeaver.model.rm.RMProjectType;
@@ -75,6 +77,9 @@ public class WebServiceAdmin implements DBWServiceAdmin {
     public AdminUserInfo getUserById(@NotNull WebSession webSession, @NotNull String userId) throws DBWebException {
         try {
             SMUser smUser = webSession.getAdminSecurityController().getUserById(userId);
+            if (smUser == null) {
+                throw new DBException("User '" + userId + "' not found");
+            }
             return new AdminUserInfo(webSession, new WebUser(smUser));
         } catch (Exception e) {
             throw new DBWebException("Error getting user - " + userId, e);
@@ -270,13 +275,7 @@ public class WebServiceAdmin implements DBWServiceAdmin {
         }
         try {
             var adminSecurityController = webSession.getAdminSecurityController();
-            SMTeam[] userTeams = adminSecurityController.getUserTeams(user);
-            List<String> teamIds = Arrays.stream(userTeams).map(SMTeam::getTeamId).collect(Collectors.toList());
-            if (teamIds.contains(team)) {
-                return true;
-            }
-            teamIds.add(team);
-            adminSecurityController.setUserTeams(user, teamIds.toArray(new String[0]), grantor.getUserId());
+            adminSecurityController.addUserTeams(user, new String[]{team}, grantor.getUserId());
             return true;
         } catch (Exception e) {
             throw new DBWebException("Error granting team", e);
@@ -299,8 +298,7 @@ public class WebServiceAdmin implements DBWServiceAdmin {
             SMTeam[] userTeams = adminSecurityController.getUserTeams(user);
             List<String> teamIds = Arrays.stream(userTeams).map(SMTeam::getTeamId).collect(Collectors.toList());
             if (teamIds.contains(team)) {
-                teamIds.remove(team);
-                adminSecurityController.setUserTeams(user, teamIds.toArray(new String[0]), grantor.getUserId());
+                adminSecurityController.deleteUserTeams(user, new String[]{team});
             } else {
                 throw new DBWebException("User '" + user + "' doesn't have team '" + team + "'");
             }
@@ -535,11 +533,12 @@ public class WebServiceAdmin implements DBWServiceAdmin {
     public boolean configureServer(WebSession webSession, Map<String, Object> params) throws DBWebException {
         try {
             CBAppConfig appConfig = new CBAppConfig(CBApplication.getInstance().getAppConfiguration());
+            CBServerConfig serverConfig = new CBServerConfig();
+            serverConfig.setServerName(CBApplication.getInstance().getServerName());
+            serverConfig.setServerURL(CBApplication.getInstance().getServerURL());
+            serverConfig.setMaxSessionIdleTime(CBApplication.getInstance().getMaxSessionIdleTime());
             String adminName = null;
             String adminPassword = null;
-            String serverName = CBApplication.getInstance().getServerName();
-            String serverURL = CBApplication.getInstance().getServerURL();
-            long sessionExpireTime = CBApplication.getInstance().getMaxSessionIdleTime();
 
             if (!params.isEmpty()) {    // FE can send an empty configuration
                 var config = new AdminServerConfig(params);
@@ -549,7 +548,7 @@ public class WebServiceAdmin implements DBWServiceAdmin {
                 appConfig.setAdminCredentialsSaveEnabled(config.isAdminCredentialsSaveEnabled());
                 appConfig.setEnabledFeatures(config.getEnabledFeatures().toArray(new String[0]));
                 // custom logic for enabling embedded drivers
-                appConfig.updateDisabledDriversConfig(config.getDisabledDrivers());
+                updateDisabledDriversConfig(appConfig, config.getDisabledDrivers());
                 appConfig.setResourceManagerEnabled(config.isResourceManagerEnabled());
 
                 if (CommonUtils.isEmpty(config.getEnabledAuthProviders())) {
@@ -564,9 +563,9 @@ public class WebServiceAdmin implements DBWServiceAdmin {
 
                 adminName = config.getAdminName();
                 adminPassword = config.getAdminPassword();
-                serverName = config.getServerName();
-                serverURL = config.getServerURL();
-                sessionExpireTime = config.getSessionExpireTime();
+                serverConfig.setServerName(config.getServerName());
+                serverConfig.setServerURL(config.getServerURL());
+                serverConfig.setMaxSessionIdleTime(config.getSessionExpireTime());
             }
 
             if (CommonUtils.isEmpty(adminName)) {
@@ -595,7 +594,7 @@ public class WebServiceAdmin implements DBWServiceAdmin {
             // Patch configuration by services
             for (DBWServiceServerConfigurator wsc : WebServiceRegistry.getInstance().getWebServices(DBWServiceServerConfigurator.class)) {
                 try {
-                    wsc.configureServer(CBApplication.getInstance(), webSession, appConfig);
+                    wsc.configureServer(CBApplication.getInstance(), webSession, serverConfig, appConfig);
                 } catch (Exception e) {
                     log.warn("Error configuring server by web service " + wsc.getClass().getName(), e);
                 }
@@ -604,12 +603,10 @@ public class WebServiceAdmin implements DBWServiceAdmin {
             boolean configurationMode = CBApplication.getInstance().isConfigurationMode();
 
             CBApplication.getInstance().finishConfiguration(
-                serverName,
-                serverURL,
                 adminName,
                 adminPassword,
                 authInfos,
-                sessionExpireTime,
+                serverConfig,
                 appConfig,
                 webSession
             );
@@ -627,6 +624,36 @@ public class WebServiceAdmin implements DBWServiceAdmin {
             throw new DBWebException("Error configuring server", e);
         }
         return true;
+    }
+
+    // we disable embedded drivers by default and enable it in enabled drivers list
+    // that's why we need so complicated logic for disabling drivers
+    private void updateDisabledDriversConfig(CBAppConfig appConfig, String[] disabledDriversConfig) {
+        Set<String> disabledIds = new LinkedHashSet<>(Arrays.asList(disabledDriversConfig));
+        Set<String> enabledIds = new LinkedHashSet<>(Arrays.asList(appConfig.getEnabledDrivers()));
+
+        // remove all disabled embedded drivers from enabled drivers list
+        enabledIds.removeAll(disabledIds);
+
+        // enable embedded driver if it is not in disabled drivers list
+        for (String driverId : appConfig.getDisabledDrivers()) {
+            if (disabledIds.contains(driverId)) {
+                // driver is also disabled
+                continue;
+            }
+            // driver is removed from disabled list
+            // we need to enable if it is embedded
+            try {
+                DBPDriver driver = WebServiceUtils.getDriverById(driverId);
+                if (driver.isEmbedded()) {
+                    enabledIds.add(driverId);
+                }
+            } catch (DBWebException e) {
+                log.error("Failed to find driver by id", e);
+            }
+        }
+        appConfig.setDisabledDrivers(disabledDriversConfig);
+        appConfig.setEnabledDrivers(enabledIds.toArray(String[]::new));
     }
 
     @Override

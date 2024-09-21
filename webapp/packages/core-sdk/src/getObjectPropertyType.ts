@@ -5,9 +5,9 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import type { ObjectPropertyInfo } from './sdk';
+import type { ObjectPropertyInfo } from './sdk.js';
 
-export type ObjectPropertyType = 'checkbox' | 'selector' | 'link' | 'input' | 'textarea' | 'file';
+export type ObjectPropertyType = 'checkbox' | 'selector' | 'link' | 'textarea' | 'file' | 'input';
 
 export function getObjectPropertyType(property: ObjectPropertyInfo): ObjectPropertyType {
   const dataType = property.dataType?.toLowerCase();

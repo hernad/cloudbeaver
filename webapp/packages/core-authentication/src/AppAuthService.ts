@@ -6,12 +6,12 @@
  * you may not use this file except in compliance with the License.
  */
 import { Bootstrap, injectable } from '@cloudbeaver/core-di';
-import { Executor, ExecutorInterrupter, IExecutor } from '@cloudbeaver/core-executor';
-import { CachedDataResourceKey, CachedResource, getCachedDataResourceLoaderState } from '@cloudbeaver/core-resource';
+import { Executor, ExecutorInterrupter, type IExecutor } from '@cloudbeaver/core-executor';
+import { type CachedDataResourceKey, CachedResource, getCachedDataResourceLoaderState } from '@cloudbeaver/core-resource';
 import { ServerConfigResource } from '@cloudbeaver/core-root';
 import type { ILoadableState } from '@cloudbeaver/core-utils';
 
-import { UserInfoResource } from './UserInfoResource';
+import { UserInfoResource } from './UserInfoResource.js';
 
 @injectable()
 export class AppAuthService extends Bootstrap {
@@ -30,7 +30,10 @@ export class AppAuthService extends Bootstrap {
 
   readonly auth: IExecutor<boolean>;
 
-  constructor(private readonly serverConfigResource: ServerConfigResource, private readonly userInfoResource: UserInfoResource) {
+  constructor(
+    private readonly serverConfigResource: ServerConfigResource,
+    private readonly userInfoResource: UserInfoResource,
+  ) {
     super();
     this.auth = new Executor();
     this.userInfoResource.onDataUpdate.addHandler(this.authUser.bind(this));
@@ -65,8 +68,4 @@ export class AppAuthService extends Bootstrap {
     await this.auth.execute(state);
     return state;
   }
-
-  register(): void {}
-
-  load(): void {}
 }

@@ -23,7 +23,7 @@ import {
   DATA_CONTEXT_SQL_EDITOR_STATE,
   ESqlDataSourceFeatures,
   getSqlEditorName,
-  ISqlDataSource,
+  type ISqlDataSource,
   LocalStorageSqlDataSource,
   MemorySqlDataSource,
   SQL_EDITOR_TOOLS_MENU,
@@ -32,9 +32,9 @@ import {
 } from '@cloudbeaver/plugin-sql-editor';
 import { isSQLEditorTab, SqlEditorNavigatorService } from '@cloudbeaver/plugin-sql-editor-navigation-tab';
 
-import { ACTION_SAVE_AS_SCRIPT } from './ACTION_SAVE_AS_SCRIPT';
-import { ResourceSqlDataSource } from './ResourceSqlDataSource';
-import { SqlEditorTabResourceService } from './SqlEditorTabResourceService';
+import { ACTION_SAVE_AS_SCRIPT } from './ACTION_SAVE_AS_SCRIPT.js';
+import { ResourceSqlDataSource } from './ResourceSqlDataSource.js';
+import { SqlEditorTabResourceService } from './SqlEditorTabResourceService.js';
 
 @injectable()
 export class PluginBootstrap extends Bootstrap {
@@ -59,7 +59,7 @@ export class PluginBootstrap extends Bootstrap {
     super();
   }
 
-  register(): void {
+  override register(): void {
     this.navNodeManagerService.onCanOpen.addHandler(this.canOpenHandler.bind(this));
     this.navNodeManagerService.navigator.addHandler(this.navigationHandler.bind(this));
 
@@ -68,7 +68,7 @@ export class PluginBootstrap extends Bootstrap {
       actions: [ACTION_SAVE_AS_SCRIPT],
       contexts: [DATA_CONTEXT_SQL_EDITOR_STATE],
       isActionApplicable: (context): boolean => {
-        const state = context.get(DATA_CONTEXT_SQL_EDITOR_STATE);
+        const state = context.get(DATA_CONTEXT_SQL_EDITOR_STATE)!;
 
         if (!this.projectsService.activeProjects.some(project => project.canEditResources)) {
           return false;
@@ -79,7 +79,7 @@ export class PluginBootstrap extends Bootstrap {
         return dataSource instanceof MemorySqlDataSource || dataSource instanceof LocalStorageSqlDataSource;
       },
       handler: async (context, action) => {
-        const state = context.get(DATA_CONTEXT_SQL_EDITOR_STATE);
+        const state = context.get(DATA_CONTEXT_SQL_EDITOR_STATE)!;
 
         let dataSource: ISqlDataSource | ResourceSqlDataSource | undefined = this.sqlDataSourceService.get(state.editorId);
 
@@ -193,7 +193,7 @@ export class PluginBootstrap extends Bootstrap {
       menus: [SQL_EDITOR_TOOLS_MENU],
       contexts: [DATA_CONTEXT_SQL_EDITOR_STATE],
       isApplicable: context => {
-        const state = context.get(DATA_CONTEXT_SQL_EDITOR_STATE);
+        const state = context.get(DATA_CONTEXT_SQL_EDITOR_STATE)!;
 
         const dataSource = this.sqlDataSourceService.get(state.editorId);
 

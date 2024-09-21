@@ -12,10 +12,10 @@ import { DATA_CONTEXT_NAV_NODE, EObjectFeature } from '@cloudbeaver/core-navigat
 import { getCachedMapResourceLoaderState } from '@cloudbeaver/core-resource';
 import { MenuBaseItem, MenuService } from '@cloudbeaver/core-view';
 
-import { MENU_SQL_GENERATORS } from './MENU_SQL_GENERATORS';
-import { SqlGeneratorsResource } from './SqlGeneratorsResource';
+import { MENU_SQL_GENERATORS } from './MENU_SQL_GENERATORS.js';
+import { SqlGeneratorsResource } from './SqlGeneratorsResource.js';
 
-const GeneratedSqlDialog = importLazyComponent(() => import('./GeneratedSqlDialog').then(m => m.GeneratedSqlDialog));
+const GeneratedSqlDialog = importLazyComponent(() => import('./GeneratedSqlDialog.js').then(m => m.GeneratedSqlDialog));
 
 @injectable()
 export class SqlGeneratorsBootstrap extends Bootstrap {
@@ -27,18 +27,18 @@ export class SqlGeneratorsBootstrap extends Bootstrap {
     super();
   }
 
-  register(): void {
+  override register(): void {
     this.menuService.setHandler({
       id: 'node-sql-generators',
       menus: [MENU_SQL_GENERATORS],
       contexts: [DATA_CONTEXT_NAV_NODE],
       isDisabled: context => {
-        const node = context.get(DATA_CONTEXT_NAV_NODE);
+        const node = context.get(DATA_CONTEXT_NAV_NODE)!;
 
         return this.sqlGeneratorsResource.get(node.id)?.length === 0;
       },
       getLoader: (context, action) => {
-        const node = context.get(DATA_CONTEXT_NAV_NODE);
+        const node = context.get(DATA_CONTEXT_NAV_NODE)!;
 
         return getCachedMapResourceLoaderState(this.sqlGeneratorsResource, () => node.id);
       },
@@ -47,7 +47,7 @@ export class SqlGeneratorsBootstrap extends Bootstrap {
       root: true,
       contexts: [DATA_CONTEXT_NAV_NODE],
       isApplicable: context => {
-        const node = context.get(DATA_CONTEXT_NAV_NODE);
+        const node = context.get(DATA_CONTEXT_NAV_NODE)!;
 
         if (!(node.objectFeatures.includes(EObjectFeature.entity) || node.objectFeatures.includes(EObjectFeature.script))) {
           return false;
@@ -62,7 +62,7 @@ export class SqlGeneratorsBootstrap extends Bootstrap {
       menus: [MENU_SQL_GENERATORS],
       contexts: [DATA_CONTEXT_NAV_NODE],
       getItems: (context, items) => {
-        const node = context.get(DATA_CONTEXT_NAV_NODE);
+        const node = context.get(DATA_CONTEXT_NAV_NODE)!;
 
         const actions = this.sqlGeneratorsResource.get(node.id) || [];
 

@@ -10,7 +10,7 @@ import { ServerSettingsManagerService } from '@cloudbeaver/core-root';
 import {
   createSettingsAliasResolver,
   ESettingsValueType,
-  ISettingDescription,
+  type ISettingDescription,
   ROOT_SETTINGS_LAYER,
   SettingsManagerService,
   SettingsProvider,
@@ -19,7 +19,7 @@ import {
 } from '@cloudbeaver/core-settings';
 import { schema, schemaExtra } from '@cloudbeaver/core-utils';
 
-import { DATA_EDITOR_SETTINGS_GROUP } from './DATA_EDITOR_SETTINGS_GROUP';
+import { DATA_EDITOR_SETTINGS_GROUP } from './DATA_EDITOR_SETTINGS_GROUP.js';
 
 const FETCH_MIN = 10;
 const FETCH_MAX = 5000;
@@ -31,6 +31,7 @@ const defaultSettings = schema.object({
   'plugin.data-viewer.fetchMin': schema.coerce.number().min(FETCH_MIN).default(DEFAULT_FETCH_SIZE),
   'plugin.data-viewer.fetchMax': schema.coerce.number().min(FETCH_MIN).default(FETCH_MAX),
   'resultset.maxrows': schema.coerce.number().min(FETCH_MIN).max(FETCH_MAX).default(DEFAULT_FETCH_SIZE),
+  'plugin.data-viewer.export.disabled': schemaExtra.stringedBoolean().default(false),
 });
 
 export type DataViewerSettings = schema.infer<typeof defaultSettings>;
@@ -43,6 +44,10 @@ export class DataViewerSettingsService extends Dependency {
 
   get disableCopyData(): boolean {
     return this.settings.getValue('plugin.data-viewer.disableCopyData');
+  }
+
+  get disableExportData(): boolean {
+    return this.settings.getValue('plugin.data-viewer.export.disabled');
   }
 
   get maxFetchSize(): number {
@@ -75,11 +80,16 @@ export class DataViewerSettingsService extends Dependency {
         'plugin.data-viewer.disableCopyData': 'core.app.dataViewer.disableCopyData',
         'plugin.data-viewer.fetchMin': 'core.app.dataViewer.fetchMin',
         'plugin.data-viewer.fetchMax': 'core.app.dataViewer.fetchMax',
+        'plugin.data-viewer.export.disabled': 'plugin.data-export.disabled',
         'resultset.maxrows': 'core.app.dataViewer.fetchDefault',
       }),
       /** @deprecated Use settings instead, will be removed in 25.0.0 */
       createSettingsAliasResolver(this.settingsResolverService, this.settings, {
         'resultset.maxrows': 'plugin.data-viewer.fetchDefault',
+      }),
+      /** @deprecated Use settings instead, will be removed in 23.0.0 */
+      createSettingsAliasResolver(this.settingsResolverService, this.settings, {
+        'plugin.data-viewer.export.disabled': 'plugin_data_export.disabled',
       }),
     );
 
@@ -146,6 +156,16 @@ export class DataViewerSettingsService extends Dependency {
           name: 'settings_data_editor_fetch_max_name',
           description: 'settings_data_editor_fetch_max_description',
           group: DATA_EDITOR_SETTINGS_GROUP,
+        },
+        {
+          group: DATA_EDITOR_SETTINGS_GROUP,
+          key: 'plugin.data-viewer.export.disabled',
+          type: ESettingsValueType.Checkbox,
+          name: 'settings_data_editor_disable_data_export_name',
+          description: 'settings_data_editor_disable_data_export_description',
+          access: {
+            scope: ['server'],
+          },
         },
       ];
 

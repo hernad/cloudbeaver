@@ -5,7 +5,9 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import { blobToBase64 } from './blobToBase64';
+import { describe, expect, it, jest } from '@jest/globals';
+
+import { blobToBase64 } from './blobToBase64.js';
 
 describe('blobToBase64', () => {
   it('converts blob to base64', async () => {
@@ -37,5 +39,6 @@ describe('blobToBase64', () => {
     blobToBase64(blob);
 
     expect(readAsDataURL).toHaveBeenCalledWith(blob);
+    jest.useRealTimers();
   });
 });

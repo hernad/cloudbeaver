@@ -21,12 +21,14 @@ import io.cloudbeaver.auth.NoAuthCredentialsProvider;
 import io.cloudbeaver.model.app.BaseWebApplication;
 import io.cloudbeaver.model.app.WebAuthApplication;
 import io.cloudbeaver.model.app.WebAuthConfiguration;
+import io.cloudbeaver.model.config.CBAppConfig;
+import io.cloudbeaver.model.config.CBServerConfig;
+import io.cloudbeaver.model.config.SMControllerConfiguration;
 import io.cloudbeaver.registry.WebDriverRegistry;
 import io.cloudbeaver.registry.WebServiceRegistry;
 import io.cloudbeaver.server.jetty.CBJettyServer;
 import io.cloudbeaver.service.DBWServiceInitializer;
 import io.cloudbeaver.service.DBWServiceServerConfigurator;
-import io.cloudbeaver.service.security.SMControllerConfiguration;
 import io.cloudbeaver.service.session.WebSessionManager;
 import io.cloudbeaver.utils.WebDataSourceUtils;
 import org.eclipse.core.runtime.Platform;
@@ -41,13 +43,13 @@ import org.jkiss.dbeaver.model.auth.AuthInfo;
 import org.jkiss.dbeaver.model.auth.SMCredentialsProvider;
 import org.jkiss.dbeaver.model.connection.DBPDriver;
 import org.jkiss.dbeaver.model.data.json.JSONUtils;
+import org.jkiss.dbeaver.model.impl.app.BaseApplicationImpl;
 import org.jkiss.dbeaver.model.runtime.DBRProgressMonitor;
 import org.jkiss.dbeaver.model.security.SMAdminController;
 import org.jkiss.dbeaver.model.security.SMConstants;
 import org.jkiss.dbeaver.model.security.SMObjectType;
 import org.jkiss.dbeaver.model.websocket.event.WSEventController;
 import org.jkiss.dbeaver.model.websocket.event.WSServerConfigurationChangedEvent;
-import org.jkiss.dbeaver.registry.BaseApplicationImpl;
 import org.jkiss.dbeaver.runtime.DBWorkbench;
 import org.jkiss.dbeaver.runtime.ui.DBPPlatformUI;
 import org.jkiss.dbeaver.utils.GeneralUtils;
@@ -69,11 +71,13 @@ import java.security.Permission;
 import java.security.Policy;
 import java.security.ProtectionDomain;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class controls all aspects of the application's execution
  */
-public abstract class CBApplication<T extends CBServerConfig> extends BaseWebApplication implements WebAuthApplication {
+public abstract class CBApplication<T extends CBServerConfig> extends
+    BaseWebApplication implements WebAuthApplication, GQLApplicationAdapter {
 
     private static final Log log = Log.getLog(CBApplication.class);
 
@@ -82,8 +86,6 @@ public abstract class CBApplication<T extends CBServerConfig> extends BaseWebApp
      * In configuration mode sessions expire after a week
      */
     private static final long CONFIGURATION_MODE_SESSION_IDLE_TIME = 60 * 60 * 1000 * 24 * 7;
-    public static final String HOST_LOCALHOST = "localhost";
-    public static final String HOST_127_0_0_1 = "127.0.0.1";
 
 
     static {
@@ -107,6 +109,8 @@ public abstract class CBApplication<T extends CBServerConfig> extends BaseWebApp
     protected final WSEventController eventController = new WSEventController();
 
     private WebSessionManager sessionManager;
+
+    private final Map<String, String> initActions = new ConcurrentHashMap<>();
 
     public CBApplication() {
         this.homeDirectory = new File(initHomeFolder());
@@ -218,9 +222,9 @@ public abstract class CBApplication<T extends CBServerConfig> extends BaseWebApp
         if (CommonUtils.isEmpty(localHostAddress)) {
             localHostAddress = System.getProperty(CBConstants.VAR_CB_LOCAL_HOST_ADDR);
         }
-        if (CommonUtils.isEmpty(localHostAddress) || HOST_127_0_0_1.equals(localHostAddress) || "::0".equals(
+        if (CommonUtils.isEmpty(localHostAddress) || CBConstants.HOST_127_0_0_1.equals(localHostAddress) || "::0".equals(
             localHostAddress)) {
-            localHostAddress = HOST_LOCALHOST;
+            localHostAddress = CBConstants.HOST_LOCALHOST;
         }
 
         final Runtime runtime = Runtime.getRuntime();
@@ -373,14 +377,16 @@ public abstract class CBApplication<T extends CBServerConfig> extends BaseWebApp
             log.info("No auto configuration was found. Server must be configured manually");
             return;
         }
+        CBServerConfig serverConfig = new CBServerConfig();
+        serverConfig.setServerName(autoServerName);
+        serverConfig.setServerURL(autoServerURL);
+        serverConfig.setMaxSessionIdleTime(getMaxSessionIdleTime());
         try {
             finishConfiguration(
-                autoServerName,
-                autoServerURL,
                 autoAdminName,
                 autoAdminPassword,
                 Collections.emptyList(),
-                getMaxSessionIdleTime(),
+                serverConfig,
                 getAppConfiguration(),
                 null
             );
@@ -524,12 +530,10 @@ public abstract class CBApplication<T extends CBServerConfig> extends BaseWebApp
     }
 
     public synchronized void finishConfiguration(
-        @NotNull String newServerName,
-        @NotNull String newServerURL,
         @NotNull String adminName,
         @Nullable String adminPassword,
         @NotNull List<AuthInfo> authInfoList,
-        long sessionExpireTime,
+        @NotNull CBServerConfig serverConfig,
         @NotNull CBAppConfig appConfig,
         @Nullable SMCredentialsProvider credentialsProvider
     ) throws DBException {
@@ -543,7 +547,7 @@ public abstract class CBApplication<T extends CBServerConfig> extends BaseWebApp
 
         // Save runtime configuration
         log.debug("Saving runtime configuration");
-        getServerConfigurationController().saveRuntimeConfig(newServerName, newServerURL, sessionExpireTime, appConfig, credentialsProvider);
+        getServerConfigurationController().saveRuntimeConfig(serverConfig, appConfig, credentialsProvider);
 
         // Grant permissions to predefined connections
         if (appConfig.isGrantConnectionsAccessToAnonymousTeam()) {
@@ -552,7 +556,8 @@ public abstract class CBApplication<T extends CBServerConfig> extends BaseWebApp
         reloadConfiguration(credentialsProvider);
     }
 
-    public synchronized void reloadConfiguration(@Nullable SMCredentialsProvider credentialsProvider) throws DBException {
+    public synchronized void reloadConfiguration(@Nullable SMCredentialsProvider credentialsProvider)
+        throws DBException {
         // Re-load runtime configuration
         try {
             Path runtimeAppConfigPath = getServerConfigurationController().getRuntimeAppConfigPath();
@@ -717,7 +722,10 @@ public abstract class CBApplication<T extends CBServerConfig> extends BaseWebApp
         return CBPlatformUI.class;
     }
 
-    public void saveProductConfiguration(SMCredentialsProvider credentialsProvider, Map<String, Object> productConfiguration) throws DBException {
+    public void saveProductConfiguration(
+        SMCredentialsProvider credentialsProvider,
+        Map<String, Object> productConfiguration
+    ) throws DBException {
         getServerConfigurationController().saveProductConfiguration(productConfiguration);
         flushConfiguration(credentialsProvider);
         sendConfigChangedEvent(credentialsProvider);
@@ -749,5 +757,22 @@ public abstract class CBApplication<T extends CBServerConfig> extends BaseWebApp
     @Override
     public boolean isEnvironmentVariablesAccessible() {
         return getAppConfiguration().isSystemVariablesResolvingEnabled();
+    }
+
+    @Override
+    public boolean isInitializationMode() {
+        return !initActions.isEmpty();
+    }
+
+    public void addInitAction(@NotNull String actionId, @NotNull String description) {
+        initActions.put(actionId, description);
+    }
+
+    public void removeInitAction(@NotNull String actionId) {
+        initActions.remove(actionId);
+    }
+
+    public Map<String, String> getInitActions() {
+        return Map.copyOf(initActions);
     }
 }

@@ -9,7 +9,7 @@ import { action, makeObservable, observable, runInAction, toJS } from 'mobx';
 
 import { AppAuthService, UserInfoResource } from '@cloudbeaver/core-authentication';
 import { injectable } from '@cloudbeaver/core-di';
-import { ExecutorInterrupter, ISyncExecutor, SyncExecutor } from '@cloudbeaver/core-executor';
+import { ExecutorInterrupter, type ISyncExecutor, SyncExecutor } from '@cloudbeaver/core-executor';
 import { ProjectInfoResource, ProjectsService } from '@cloudbeaver/core-projects';
 import {
   CachedMapAllKey,
@@ -23,24 +23,24 @@ import {
   resourceKeyListAliasFactory,
   ResourceKeyUtils,
 } from '@cloudbeaver/core-resource';
-import { DataSynchronizationService, NavigatorViewSettings, ServerEventId, SessionDataResource } from '@cloudbeaver/core-root';
+import { DataSynchronizationService, type NavigatorViewSettings, ServerEventId, SessionDataResource } from '@cloudbeaver/core-root';
 import {
-  AdminConnectionGrantInfo,
-  AdminConnectionSearchInfo,
-  ConnectionConfig,
-  GetUserConnectionsQueryVariables,
+  type AdminConnectionGrantInfo,
+  type AdminConnectionSearchInfo,
+  type ConnectionConfig,
+  type GetUserConnectionsQueryVariables,
   GraphQLService,
-  InitConnectionMutationVariables,
-  NavigatorSettingsInput,
-  TestConnectionMutation,
-  UserConnectionAuthPropertiesFragment,
+  type InitConnectionMutationVariables,
+  type NavigatorSettingsInput,
+  type TestConnectionMutation,
+  type UserConnectionAuthPropertiesFragment,
 } from '@cloudbeaver/core-sdk';
 import { schemaValidationError } from '@cloudbeaver/core-utils';
 
-import { CONNECTION_INFO_PARAM_SCHEMA, type IConnectionInfoParams } from './CONNECTION_INFO_PARAM_SCHEMA';
-import { ConnectionInfoEventHandler, IConnectionInfoEvent } from './ConnectionInfoEventHandler';
-import type { DatabaseConnection } from './DatabaseConnection';
-import { DBDriverResource } from './DBDriverResource';
+import { CONNECTION_INFO_PARAM_SCHEMA, type IConnectionInfoParams } from './CONNECTION_INFO_PARAM_SCHEMA.js';
+import { ConnectionInfoEventHandler, type IConnectionInfoEvent } from './ConnectionInfoEventHandler.js';
+import type { DatabaseConnection } from './DatabaseConnection.js';
+import { DBDriverResource } from './DBDriverResource.js';
 
 export type Connection = DatabaseConnection & {
   authProperties?: UserConnectionAuthPropertiesFragment[];
@@ -55,7 +55,6 @@ export type ConnectionInitConfig = Omit<
   | 'includeCredentialsSaved'
   | 'includeProperties'
   | 'includeProviderProperties'
-  | 'includeSharedSecrets'
   | 'customIncludeOptions'
 >;
 export type ConnectionInfoIncludes = Omit<GetUserConnectionsQueryVariables, 'id'>;
@@ -450,9 +449,7 @@ export class ConnectionInfoResource extends CachedMapResource<IConnectionInfoPar
       this.onDataOutdated.execute(key);
     });
 
-    const connection = this.get(key)!;
-    this.onConnectionClose.execute(key);
-    return connection;
+    return this.get(key)!;
   }
 
   deleteConnection(key: IConnectionInfoParams): Promise<void>;
@@ -485,7 +482,7 @@ export class ConnectionInfoResource extends CachedMapResource<IConnectionInfoPar
     }
   }
 
-  isKeyEqual(param: IConnectionInfoParams, second: IConnectionInfoParams): boolean {
+  override isKeyEqual(param: IConnectionInfoParams, second: IConnectionInfoParams): boolean {
     return isConnectionInfoParamEqual(param, second);
   }
 
@@ -513,7 +510,7 @@ export class ConnectionInfoResource extends CachedMapResource<IConnectionInfoPar
       const outdated = ResourceKeyUtils.filter(key, key => this.isOutdated(key, includes));
 
       if (!refresh && outdated.length === 1) {
-        originalKey = outdated[0]; // load only single connection
+        originalKey = outdated[0]!; // load only single connection
       }
     }
 
@@ -555,7 +552,7 @@ export class ConnectionInfoResource extends CachedMapResource<IConnectionInfoPar
     return this.data;
   }
 
-  protected dataSet(key: IConnectionInfoParams, value: Connection): void {
+  protected override dataSet(key: IConnectionInfoParams, value: Connection): void {
     const oldConnection = this.dataGet(key);
     if (value.nodePath) {
       this.nodeIdMap.set(value.nodePath, key);
@@ -568,9 +565,13 @@ export class ConnectionInfoResource extends CachedMapResource<IConnectionInfoPar
         ...handler,
       })),
     });
+
+    if (oldConnection?.connected && !value.connected) {
+      this.onConnectionClose.execute(key);
+    }
   }
 
-  protected dataDelete(key: IConnectionInfoParams): void {
+  protected override dataDelete(key: IConnectionInfoParams): void {
     const connection = this.dataGet(key);
     if (connection?.nodePath) {
       this.nodeIdMap.delete(connection.nodePath);
@@ -578,7 +579,7 @@ export class ConnectionInfoResource extends CachedMapResource<IConnectionInfoPar
     super.dataDelete(key);
   }
 
-  protected resetDataToDefault(): void {
+  protected override resetDataToDefault(): void {
     super.resetDataToDefault();
     this.nodeIdMap.clear();
   }
@@ -593,7 +594,6 @@ export class ConnectionInfoResource extends CachedMapResource<IConnectionInfoPar
       includeCredentialsSaved: false,
       includeProperties: false,
       includeProviderProperties: false,
-      includeSharedSecrets: false,
       customIncludeOptions: false,
     };
   }
@@ -639,9 +639,13 @@ export function compareNewConnectionsInfo(a: DatabaseConnection, b: DatabaseConn
   return 0;
 }
 
+export function createConnectionParam(connection: Pick<Connection, 'id' | 'projectId'>): IConnectionInfoParams;
 export function createConnectionParam(connection: Connection): IConnectionInfoParams;
 export function createConnectionParam(projectId: string, connectionId: string): IConnectionInfoParams;
-export function createConnectionParam(projectIdOrConnection: string | Connection, connectionId?: string): IConnectionInfoParams {
+export function createConnectionParam(
+  projectIdOrConnection: string | Connection | Pick<Connection, 'id' | 'projectId'>,
+  connectionId?: string,
+): IConnectionInfoParams {
   if (typeof projectIdOrConnection === 'object') {
     connectionId = projectIdOrConnection.id;
     projectIdOrConnection = projectIdOrConnection.projectId;

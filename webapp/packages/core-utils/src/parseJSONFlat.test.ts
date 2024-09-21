@@ -5,7 +5,9 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import { parseJSONFlat } from './parseJSONFlat';
+import { describe, expect, it, jest } from '@jest/globals';
+
+import { parseJSONFlat } from './parseJSONFlat.js';
 
 describe('parseJSONFlat', () => {
   it('should parse null values', () => {

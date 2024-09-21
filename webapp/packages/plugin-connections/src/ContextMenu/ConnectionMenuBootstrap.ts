@@ -6,7 +6,7 @@
  * you may not use this file except in compliance with the License.
  */
 import {
-  Connection,
+  type Connection,
   ConnectionInfoResource,
   ConnectionsManagerService,
   ConnectionsSettingsService,
@@ -21,24 +21,24 @@ import {
   CONNECTION_NAVIGATOR_VIEW_SETTINGS,
   EAdminPermission,
   isNavigatorViewSettingsEqual,
-  NavigatorViewSettings,
+  type NavigatorViewSettings,
   PermissionsService,
   ServerConfigResource,
 } from '@cloudbeaver/core-root';
 import { ACTION_DELETE, ActionService, MenuSeparatorItem, MenuService } from '@cloudbeaver/core-view';
 import { MENU_APP_ACTIONS } from '@cloudbeaver/plugin-top-app-bar';
 
-import { PluginConnectionsSettingsService } from '../PluginConnectionsSettingsService';
-import { PublicConnectionFormService } from '../PublicConnectionForm/PublicConnectionFormService';
-import { ACTION_CONNECTION_CHANGE_CREDENTIALS } from './Actions/ACTION_CONNECTION_CHANGE_CREDENTIALS';
-import { ACTION_CONNECTION_DISCONNECT } from './Actions/ACTION_CONNECTION_DISCONNECT';
-import { ACTION_CONNECTION_DISCONNECT_ALL } from './Actions/ACTION_CONNECTION_DISCONNECT_ALL';
-import { ACTION_CONNECTION_EDIT } from './Actions/ACTION_CONNECTION_EDIT';
-import { ACTION_CONNECTION_VIEW_ADVANCED } from './Actions/ACTION_CONNECTION_VIEW_ADVANCED';
-import { ACTION_CONNECTION_VIEW_SIMPLE } from './Actions/ACTION_CONNECTION_VIEW_SIMPLE';
-import { ACTION_CONNECTION_VIEW_SYSTEM_OBJECTS } from './Actions/ACTION_CONNECTION_VIEW_SYSTEM_OBJECTS';
-import { MENU_CONNECTION_VIEW } from './MENU_CONNECTION_VIEW';
-import { MENU_CONNECTIONS } from './MENU_CONNECTIONS';
+import { PluginConnectionsSettingsService } from '../PluginConnectionsSettingsService.js';
+import { PublicConnectionFormService } from '../PublicConnectionForm/PublicConnectionFormService.js';
+import { ACTION_CONNECTION_CHANGE_CREDENTIALS } from './Actions/ACTION_CONNECTION_CHANGE_CREDENTIALS.js';
+import { ACTION_CONNECTION_DISCONNECT } from './Actions/ACTION_CONNECTION_DISCONNECT.js';
+import { ACTION_CONNECTION_DISCONNECT_ALL } from './Actions/ACTION_CONNECTION_DISCONNECT_ALL.js';
+import { ACTION_CONNECTION_EDIT } from './Actions/ACTION_CONNECTION_EDIT.js';
+import { ACTION_CONNECTION_VIEW_ADVANCED } from './Actions/ACTION_CONNECTION_VIEW_ADVANCED.js';
+import { ACTION_CONNECTION_VIEW_SIMPLE } from './Actions/ACTION_CONNECTION_VIEW_SIMPLE.js';
+import { ACTION_CONNECTION_VIEW_SYSTEM_OBJECTS } from './Actions/ACTION_CONNECTION_VIEW_SYSTEM_OBJECTS.js';
+import { MENU_CONNECTION_VIEW } from './MENU_CONNECTION_VIEW.js';
+import { MENU_CONNECTIONS } from './MENU_CONNECTIONS.js';
 
 @injectable()
 export class ConnectionMenuBootstrap extends Bootstrap {
@@ -58,7 +58,7 @@ export class ConnectionMenuBootstrap extends Bootstrap {
     super();
   }
 
-  register(): void {
+  override register(): void {
     this.addConnectionsMenuToTopAppBar();
 
     this.menuService.addCreator({
@@ -68,13 +68,13 @@ export class ConnectionMenuBootstrap extends Bootstrap {
           return false;
         }
 
-        const connection = context.tryGet(DATA_CONTEXT_CONNECTION);
+        const connection = context.get(DATA_CONTEXT_CONNECTION);
 
         if (!connection?.connected) {
           return false;
         }
 
-        const node = context.tryGet(DATA_CONTEXT_NAV_NODE);
+        const node = context.get(DATA_CONTEXT_NAV_NODE);
 
         if (node && !node.objectFeatures.includes(EObjectFeature.dataSource)) {
           return false;
@@ -99,8 +99,9 @@ export class ConnectionMenuBootstrap extends Bootstrap {
     this.actionService.addHandler({
       id: 'connection-view',
       actions: [ACTION_CONNECTION_VIEW_SIMPLE, ACTION_CONNECTION_VIEW_ADVANCED, ACTION_CONNECTION_VIEW_SYSTEM_OBJECTS],
+      contexts: [DATA_CONTEXT_CONNECTION],
       isChecked: (context, action) => {
-        const connection = context.get(DATA_CONTEXT_CONNECTION);
+        const connection = context.get(DATA_CONTEXT_CONNECTION)!;
 
         switch (action) {
           case ACTION_CONNECTION_VIEW_SIMPLE: {
@@ -117,7 +118,7 @@ export class ConnectionMenuBootstrap extends Bootstrap {
         return false;
       },
       handler: async (context, action) => {
-        const connection = context.get(DATA_CONTEXT_CONNECTION);
+        const connection = context.get(DATA_CONTEXT_CONNECTION)!;
 
         switch (action) {
           case ACTION_CONNECTION_VIEW_SIMPLE: {
@@ -155,13 +156,14 @@ export class ConnectionMenuBootstrap extends Bootstrap {
 
     this.actionService.addHandler({
       id: 'connection-management',
+      contexts: [DATA_CONTEXT_CONNECTION],
       isActionApplicable: (context, action) => {
-        const connection = context.tryGet(DATA_CONTEXT_CONNECTION);
+        const connection = context.get(DATA_CONTEXT_CONNECTION);
 
         if (!connection) {
           return false;
         }
-        const node = context.tryGet(DATA_CONTEXT_NAV_NODE);
+        const node = context.get(DATA_CONTEXT_NAV_NODE);
 
         if (node && !node.objectFeatures.includes(EObjectFeature.dataSource)) {
           return false;
@@ -189,17 +191,8 @@ export class ConnectionMenuBootstrap extends Bootstrap {
 
         return false;
       },
-      isHidden: (context, action) => {
-        const connection = context.tryGet(DATA_CONTEXT_CONNECTION);
-
-        if (action === ACTION_CONNECTION_CHANGE_CREDENTIALS) {
-          return !connection?.credentialsSaved;
-        }
-
-        return false;
-      },
       getLoader: (context, action) => {
-        const connection = context.get(DATA_CONTEXT_CONNECTION);
+        const connection = context.get(DATA_CONTEXT_CONNECTION)!;
 
         if (action === ACTION_CONNECTION_CHANGE_CREDENTIALS) {
           return getCachedMapResourceLoaderState(
@@ -213,7 +206,7 @@ export class ConnectionMenuBootstrap extends Bootstrap {
         return [];
       },
       handler: async (context, action) => {
-        const connection = context.get(DATA_CONTEXT_CONNECTION);
+        const connection = context.get(DATA_CONTEXT_CONNECTION)!;
 
         switch (action) {
           case ACTION_CONNECTION_DISCONNECT: {

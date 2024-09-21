@@ -10,12 +10,12 @@ import { observer } from 'mobx-react-lite';
 import { Placeholder, s, useS } from '@cloudbeaver/core-blocks';
 import { useService } from '@cloudbeaver/core-di';
 
-import type { IDatabaseDataModel } from '../../DatabaseDataModel/IDatabaseDataModel';
+import type { IDatabaseDataModel } from '../../DatabaseDataModel/IDatabaseDataModel.js';
 import classes from './TableHeader.module.css';
-import { TableHeaderService } from './TableHeaderService';
+import { TableHeaderService } from './TableHeaderService.js';
 
 interface Props {
-  model: IDatabaseDataModel<any, any>;
+  model: IDatabaseDataModel;
   resultIndex: number;
   simple: boolean;
   className?: string;

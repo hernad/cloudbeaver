@@ -23,11 +23,11 @@ module.exports = {
   moduleNameMapper: {
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': require.resolve('./__mocks__/fileMock.js'),
     '\\.(css|scss|less)$': require.resolve('./__mocks__/styleMock.js'),
-    '^dexie$': require.resolve('dexie'),
+    // '^dexie$': require.resolve('dexie'),
   },
   // passWithNoTests: true,
   setupFiles: [require.resolve('fake-indexeddb/auto'), require.resolve('../tests/setup.js')],
-  setupFilesAfterEnv: ['@testing-library/jest-dom'],
+  setupFilesAfterEnv: ['@testing-library/jest-dom/jest-globals'],
   transform: {
     '\\.jsx?$': [require.resolve('@swc/jest')],
   },
@@ -36,4 +36,5 @@ module.exports = {
     // https://mswjs.io/docs/migrations/1.x-to-2.x#cannot-find-module-mswnode-jsdom
     customExportConditions: [''],
   },
+  injectGlobals: false,
 };

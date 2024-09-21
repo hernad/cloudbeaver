@@ -5,8 +5,10 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import { action, AnnotationsMap, makeObservable, runInAction, untracked } from 'mobx';
+import { action, type AnnotationsMap, makeObservable, runInAction, untracked } from 'mobx';
 import { useLayoutEffect, useState } from 'react';
+
+import { bindFunctions } from '@cloudbeaver/core-utils';
 
 export function useObservableRef<T extends Record<any, any>>(
   init: () => T & ThisType<T>,
@@ -96,16 +98,6 @@ export function useObservableRef<T extends Record<any, any>>(
   );
 
   return state;
-}
-
-function bindFunctions<T>(object: T, keys: Array<keyof T>): void {
-  for (const key of keys) {
-    const value = object[key];
-
-    if (typeof value === 'function') {
-      object[key] = value.bind(object);
-    }
-  }
 }
 
 function assign(object: any, update: any): void {

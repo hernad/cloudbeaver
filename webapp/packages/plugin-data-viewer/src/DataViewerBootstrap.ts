@@ -7,18 +7,24 @@
  */
 import { Bootstrap, injectable } from '@cloudbeaver/core-di';
 
-import { DataViewerTabService } from './DataViewerTabService';
+import { DataViewerTabService } from './DataViewerTabService.js';
+import { ResultSetTableFooterMenuService } from './ResultSet/ResultSetTableFooterMenuService.js';
+import { TableFooterMenuService } from './TableViewer/TableFooter/TableFooterMenu/TableFooterMenuService.js';
 
 @injectable()
 export class DataViewerBootstrap extends Bootstrap {
-  constructor(private readonly dataViewerTabService: DataViewerTabService) {
+  constructor(
+    private readonly dataViewerTabService: DataViewerTabService,
+    private readonly tableFooterMenuService: TableFooterMenuService,
+    private readonly resultSetTableFooterMenuService: ResultSetTableFooterMenuService,
+  ) {
     super();
   }
 
-  register(): void | Promise<void> {
+  override register(): void | Promise<void> {
     this.dataViewerTabService.registerTabHandler();
     this.dataViewerTabService.register();
+    this.tableFooterMenuService.register();
+    this.resultSetTableFooterMenuService.register();
   }
-
-  load(): void {}
 }

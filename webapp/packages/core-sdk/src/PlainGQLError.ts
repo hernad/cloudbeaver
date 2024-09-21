@@ -6,20 +6,19 @@
  * you may not use this file except in compliance with the License.
  */
 import type { ClientError } from 'graphql-request';
-import type { GraphQLRequestContext, GraphQLResponse } from 'graphql-request/build/cjs/types';
 
 import { getTextBetween } from '@cloudbeaver/core-utils';
 
-import { DetailsError } from './DetailsError';
+import { DetailsError } from './DetailsError.js';
 
 export class PlainGQLError extends DetailsError {
-  response: GraphQLResponse;
-  request: GraphQLRequestContext;
+  response: ClientError['response'];
+  request: ClientError['request'];
   constructor(clientError: ClientError) {
     let message = clientError.message;
 
-    if (typeof clientError.response.error === 'string') {
-      message = getTextBetween(clientError.response.error, '<title>', '</title>');
+    if (typeof clientError.response['error'] === 'string') {
+      message = getTextBetween(clientError.response['error'], '<title>', '</title>');
     }
 
     super(message, { cause: clientError });
@@ -28,7 +27,7 @@ export class PlainGQLError extends DetailsError {
     this.request = clientError.request;
   }
 
-  hasDetails(): boolean {
+  override hasDetails(): boolean {
     return false;
   }
 }

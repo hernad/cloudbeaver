@@ -5,7 +5,9 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import { getProgressPercent } from './getProgressPercent';
+import { describe, expect, it } from '@jest/globals';
+
+import { getProgressPercent } from './getProgressPercent.js';
 
 describe('getProgressPercent', () => {
   it('calculates the correct percentage', () => {

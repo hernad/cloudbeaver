@@ -5,7 +5,9 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import { isImageFormat } from './isImageFormat';
+import { describe, expect, test } from '@jest/globals';
+
+import { isImageFormat } from './isImageFormat.js';
 
 describe('Is image format', () => {
   test('should return "true" when link with ".jpeg" extension is passed', () => {

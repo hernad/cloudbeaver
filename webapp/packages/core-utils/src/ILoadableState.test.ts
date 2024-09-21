@@ -5,7 +5,9 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import { getFirstException, ILoadableState, isContainsException, isLoadableStateHasException } from './ILoadableState';
+import { describe, expect, it } from '@jest/globals';
+
+import { getFirstException, type ILoadableState, isContainsException, isLoadableStateHasException } from './ILoadableState.js';
 
 const getMockedLoadableState = (state: Partial<ILoadableState>): ILoadableState => ({
   exception: null,

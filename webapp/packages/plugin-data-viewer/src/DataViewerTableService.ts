@@ -5,24 +5,23 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import { Connection, ConnectionExecutionContextService, createConnectionParam } from '@cloudbeaver/core-connections';
-import { App, injectable } from '@cloudbeaver/core-di';
-import { EObjectFeature, NavNode, NavNodeManagerService } from '@cloudbeaver/core-navigation-tree';
+import { type Connection, ConnectionExecutionContextService, createConnectionParam } from '@cloudbeaver/core-connections';
+import { injectable, IServiceProvider } from '@cloudbeaver/core-di';
+import { EObjectFeature, type NavNode, NavNodeManagerService } from '@cloudbeaver/core-navigation-tree';
 import { AsyncTaskInfoService, GraphQLService } from '@cloudbeaver/core-sdk';
 
-import { ContainerDataSource, IDataContainerOptions } from './ContainerDataSource';
-import { DatabaseDataModel } from './DatabaseDataModel/DatabaseDataModel';
-import type { IDatabaseDataModel } from './DatabaseDataModel/IDatabaseDataModel';
-import { DatabaseDataAccessMode } from './DatabaseDataModel/IDatabaseDataSource';
-import type { IDatabaseResultSet } from './DatabaseDataModel/IDatabaseResultSet';
-import { DataViewerService } from './DataViewerService';
-import { DataViewerSettingsService } from './DataViewerSettingsService';
-import { TableViewerStorageService } from './TableViewer/TableViewerStorageService';
+import { ContainerDataSource } from './ContainerDataSource.js';
+import { DatabaseDataModel } from './DatabaseDataModel/DatabaseDataModel.js';
+import type { IDatabaseDataModel } from './DatabaseDataModel/IDatabaseDataModel.js';
+import { DatabaseDataAccessMode } from './DatabaseDataModel/IDatabaseDataSource.js';
+import { DataViewerService } from './DataViewerService.js';
+import { DataViewerSettingsService } from './DataViewerSettingsService.js';
+import { TableViewerStorageService } from './TableViewer/TableViewerStorageService.js';
 
 @injectable()
 export class DataViewerTableService {
   constructor(
-    private readonly app: App,
+    private readonly serviceProvider: IServiceProvider,
     private readonly navNodeManagerService: NavNodeManagerService,
     private readonly tableViewerStorageService: TableViewerStorageService,
     private readonly graphQLService: GraphQLService,
@@ -32,11 +31,11 @@ export class DataViewerTableService {
     private readonly dataViewerSettingsService: DataViewerSettingsService,
   ) {}
 
-  create(connection: Connection, node: NavNode | undefined): IDatabaseDataModel<IDataContainerOptions, IDatabaseResultSet> {
+  create(connection: Connection, node: NavNode | undefined): IDatabaseDataModel<ContainerDataSource> {
     const nodeInfo = this.navNodeManagerService.getNodeContainerInfo(node?.id ?? '');
 
     const source = new ContainerDataSource(
-      this.app.getServiceInjector(),
+      this.serviceProvider,
       this.graphQLService,
       this.asyncTaskInfoService,
       this.connectionExecutionContextService,

@@ -12,15 +12,17 @@ import { useService } from '@cloudbeaver/core-di';
 import { EventContext, EventStopPropagationFlag } from '@cloudbeaver/core-events';
 import { copyToClipboard } from '@cloudbeaver/core-utils';
 import {
+  DatabaseSelectAction,
   DataViewerService,
-  IResultSetColumnKey,
-  IResultSetElementKey,
+  type IResultSetColumnKey,
+  type IResultSetElementKey,
   ResultSetDataKeysUtils,
   ResultSetSelectAction,
+  useDataViewerCopyHandler,
 } from '@cloudbeaver/plugin-data-viewer';
 
-import type { IDataGridSelectionContext } from './DataGridSelection/DataGridSelectionContext';
-import type { ITableData } from './TableDataContext';
+import type { IDataGridSelectionContext } from './DataGridSelection/DataGridSelectionContext.js';
+import type { ITableData } from './TableDataContext.js';
 
 const EVENT_KEY_CODE = {
   C: 'KeyC',
@@ -32,7 +34,7 @@ function getCellCopyValue(tableData: ITableData, key: IResultSetElementKey): str
 
 function getSelectedCellsValue(tableData: ITableData, selectedCells: Map<string, IResultSetElementKey[]>) {
   const orderedSelectedCells = new Map<string, IResultSetElementKey[]>(
-    [...selectedCells].sort((a, b) => tableData.getRowIndexFromKey(a[1][0].row) - tableData.getRowIndexFromKey(b[1][0].row)),
+    [...selectedCells].sort((a, b) => tableData.getRowIndexFromKey(a[1]![0]!.row) - tableData.getRowIndexFromKey(b[1]![0]!.row)),
   );
 
   const selectedColumns: IResultSetColumnKey[] = [];
@@ -66,11 +68,12 @@ function getSelectedCellsValue(tableData: ITableData, selectedCells: Map<string,
 
 export function useGridSelectedCellsCopy(
   tableData: ITableData,
-  resultSetSelectAction: ResultSetSelectAction,
+  selectAction: DatabaseSelectAction | undefined,
   selectionContext: IDataGridSelectionContext,
 ) {
   const dataViewerService = useService(DataViewerService);
-  const props = useObjectRef({ tableData, selectionContext, resultSetSelectAction });
+  const props = useObjectRef({ tableData, selectionContext, selectAction });
+  const copyEventHandler = useDataViewerCopyHandler();
 
   const onKeydownHandler = useCallback((event: React.KeyboardEvent) => {
     if ((event.ctrlKey || event.metaKey) && event.nativeEvent.code === EVENT_KEY_CODE.C) {
@@ -85,7 +88,11 @@ export function useGridSelectedCellsCopy(
       EventContext.set(event, EventStopPropagationFlag);
 
       if (dataViewerService.canCopyData) {
-        const focusedElement = props.resultSetSelectAction.getFocusedElement();
+        if (!(props.selectAction instanceof ResultSetSelectAction)) {
+          throw new Error('Copying data is not supported');
+        }
+
+        const focusedElement = props.selectAction?.getFocusedElement();
         let value: string | null = null;
 
         if (Array.from(props.selectionContext.selectedCells.keys()).length > 0) {
@@ -98,6 +105,8 @@ export function useGridSelectedCellsCopy(
           copyToClipboard(value);
         }
       }
+
+      copyEventHandler(event);
     }
   }, []);
 

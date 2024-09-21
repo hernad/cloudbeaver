@@ -8,18 +8,18 @@
 import { Bootstrap, injectable } from '@cloudbeaver/core-di';
 import { ActionService, KeyBindingService, MenuCheckboxItem, MenuService } from '@cloudbeaver/core-view';
 
-import { ACTION_SQL_EDITOR_SHOW_OUTPUT } from '../../actions/ACTION_SQL_EDITOR_SHOW_OUTPUT';
-import { KEY_BINDING_SQL_EDITOR_SHOW_OUTPUT } from '../../actions/bindings/KEY_BINDING_SQL_EDITOR_SHOW_OUTPUT';
-import { DATA_CONTEXT_SQL_EDITOR_STATE } from '../../DATA_CONTEXT_SQL_EDITOR_STATE';
-import { ESqlDataSourceFeatures } from '../../SqlDataSource/ESqlDataSourceFeatures';
-import { SqlDataSourceService } from '../../SqlDataSource/SqlDataSourceService';
-import { SQL_EDITOR_ACTIONS_MENU } from '../../SqlEditor/SQL_EDITOR_ACTIONS_MENU';
-import { ACTION_SHOW_OUTPUT_LOGS } from './ACTION_SHOW_OUTPUT_LOGS';
-import { OUTPUT_LOG_TYPES } from './IOutputLogTypes';
-import { OUTPUT_LOGS_FILTER_MENU } from './OUTPUT_LOGS_FILTER_MENU';
-import { OUTPUT_LOGS_MENU } from './OUTPUT_LOGS_MENU';
-import { OUTPUT_LOGS_SETTINGS_MENU } from './OUTPUT_LOGS_SETTINGS_MENU';
-import { OutputLogsService } from './OutputLogsService';
+import { ACTION_SQL_EDITOR_SHOW_OUTPUT } from '../../actions/ACTION_SQL_EDITOR_SHOW_OUTPUT.js';
+import { KEY_BINDING_SQL_EDITOR_SHOW_OUTPUT } from '../../actions/bindings/KEY_BINDING_SQL_EDITOR_SHOW_OUTPUT.js';
+import { DATA_CONTEXT_SQL_EDITOR_STATE } from '../../DATA_CONTEXT_SQL_EDITOR_STATE.js';
+import { ESqlDataSourceFeatures } from '../../SqlDataSource/ESqlDataSourceFeatures.js';
+import { SqlDataSourceService } from '../../SqlDataSource/SqlDataSourceService.js';
+import { SQL_EDITOR_ACTIONS_MENU } from '../../SqlEditor/SQL_EDITOR_ACTIONS_MENU.js';
+import { ACTION_SHOW_OUTPUT_LOGS } from './ACTION_SHOW_OUTPUT_LOGS.js';
+import { OUTPUT_LOG_TYPES } from './IOutputLogTypes.js';
+import { OUTPUT_LOGS_FILTER_MENU } from './OUTPUT_LOGS_FILTER_MENU.js';
+import { OUTPUT_LOGS_MENU } from './OUTPUT_LOGS_MENU.js';
+import { OUTPUT_LOGS_SETTINGS_MENU } from './OUTPUT_LOGS_SETTINGS_MENU.js';
+import { OutputLogsService } from './OutputLogsService.js';
 
 @injectable()
 export class OutputMenuBootstrap extends Bootstrap {
@@ -33,7 +33,7 @@ export class OutputMenuBootstrap extends Bootstrap {
     super();
   }
 
-  register(): void {
+  override register(): void {
     this.menuService.addCreator({
       menus: [OUTPUT_LOGS_MENU],
       getItems(context, items) {
@@ -44,7 +44,7 @@ export class OutputMenuBootstrap extends Bootstrap {
     this.menuService.addCreator({
       menus: [OUTPUT_LOGS_FILTER_MENU],
       getItems: (context, items) => {
-        const state = context.tryGet(DATA_CONTEXT_SQL_EDITOR_STATE);
+        const state = context.get(DATA_CONTEXT_SQL_EDITOR_STATE);
 
         if (!state) {
           return [];
@@ -86,7 +86,7 @@ export class OutputMenuBootstrap extends Bootstrap {
     this.menuService.addCreator({
       menus: [OUTPUT_LOGS_SETTINGS_MENU],
       getItems: (context, items) => {
-        const state = context.tryGet(DATA_CONTEXT_SQL_EDITOR_STATE);
+        const state = context.get(DATA_CONTEXT_SQL_EDITOR_STATE);
 
         if (!state) {
           return [];
@@ -121,7 +121,7 @@ export class OutputMenuBootstrap extends Bootstrap {
       actions: [ACTION_SHOW_OUTPUT_LOGS],
       contexts: [DATA_CONTEXT_SQL_EDITOR_STATE],
       isActionApplicable: (context): boolean => {
-        const state = context.get(DATA_CONTEXT_SQL_EDITOR_STATE);
+        const state = context.get(DATA_CONTEXT_SQL_EDITOR_STATE)!;
 
         const sqlDataSource = this.sqlDataSourceService.get(state.editorId);
         const isQuery = sqlDataSource?.hasFeature(ESqlDataSourceFeatures.query);
@@ -131,7 +131,7 @@ export class OutputMenuBootstrap extends Bootstrap {
       },
 
       handler: async (context, action) => {
-        const state = context.get(DATA_CONTEXT_SQL_EDITOR_STATE);
+        const state = context.get(DATA_CONTEXT_SQL_EDITOR_STATE)!;
 
         if (action === ACTION_SHOW_OUTPUT_LOGS) {
           this.outputLogsService.showOutputLogs(state);
@@ -148,8 +148,9 @@ export class OutputMenuBootstrap extends Bootstrap {
       id: 'sql-editor-show-output',
       binding: KEY_BINDING_SQL_EDITOR_SHOW_OUTPUT,
       actions: [ACTION_SQL_EDITOR_SHOW_OUTPUT],
+      contexts: [DATA_CONTEXT_SQL_EDITOR_STATE],
       handler: (context, action) => {
-        const state = context.get(DATA_CONTEXT_SQL_EDITOR_STATE);
+        const state = context.get(DATA_CONTEXT_SQL_EDITOR_STATE)!;
 
         if (action === ACTION_SQL_EDITOR_SHOW_OUTPUT) {
           this.outputLogsService.showOutputLogs(state);

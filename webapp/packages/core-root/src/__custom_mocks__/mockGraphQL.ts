@@ -5,10 +5,11 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
+import { afterAll, afterEach, beforeAll } from '@jest/globals';
 import type { GraphQLHandler } from 'msw';
 import { setupServer } from 'msw/node';
 
-import { createWebsocketEndpoint } from './createWebsocketEndpoint';
+import { createWebsocketEndpoint } from './createWebsocketEndpoint.js';
 
 export function mockGraphQL(...requestHandlers: GraphQLHandler[]) {
   const server = setupServer(...requestHandlers, createWebsocketEndpoint());

@@ -9,7 +9,9 @@ import { observer } from 'mobx-react-lite';
 
 import { s, useS, useTranslate } from '@cloudbeaver/core-blocks';
 
-import type { IDatabaseDataModel } from '../DatabaseDataModel/IDatabaseDataModel';
+import type { IDatabaseDataModel } from '../DatabaseDataModel/IDatabaseDataModel.js';
+import { type IDatabaseResultSet } from '../DatabaseDataModel/IDatabaseResultSet.js';
+import { isResultSetDataSource, ResultSetDataSource } from '../ResultSet/ResultSetDataSource.js';
 import classes from './TableStatistics.module.css';
 
 interface Props {
@@ -21,16 +23,25 @@ export const TableStatistics = observer<Props>(function TableStatistics({ model,
   const styles = useS(classes);
   const translate = useTranslate();
   const source = model.source;
-  const result = model.getResult(resultIndex);
+  let updatedRows: number | null = null;
+
+  if (isResultSetDataSource(source)) {
+    const result = (source as ResultSetDataSource).getResult(resultIndex) as IDatabaseResultSet | null;
+    updatedRows = result?.updateRowCount ?? null;
+  }
 
   return (
     <div className={s(styles, { statistics: true })}>
-      {translate('data_viewer_statistics_status')} {source.requestInfo.requestMessage}
+      {translate('data_viewer_statistics_status')} {translate(source.requestInfo.requestMessage)}
       <br />
-      {translate('data_viewer_statistics_duration')} {source.requestInfo.requestDuration} ms
+      {translate('data_viewer_statistics_duration')} {source.requestInfo.requestDuration} {translate('ui_ms')}
       <br />
-      {translate('data_viewer_statistics_updated_rows')} {result?.updateRowCount || 0}
-      <br />
+      {updatedRows !== null && (
+        <>
+          {translate('data_viewer_statistics_updated_rows')} {updatedRows}
+          <br />
+        </>
+      )}
       <br />
       <pre>{source.requestInfo.source}</pre>
     </div>

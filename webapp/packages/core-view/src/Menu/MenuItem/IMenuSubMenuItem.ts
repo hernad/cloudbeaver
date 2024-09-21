@@ -5,8 +5,9 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import type { IMenu } from '../IMenu';
-import type { IMenuItem, IMenuItemEvents } from './IMenuItem';
+import type { IMenu } from '../IMenu.js';
+import type { IMenuActionItem } from './IMenuActionItem.js';
+import type { IMenuItem, IMenuItemEvents } from './IMenuItem.js';
 
 export interface IMenuSubMenuEvents extends IMenuItemEvents {
   onOpen?: () => void;
@@ -17,6 +18,11 @@ export interface IMenuSubMenuItemProperties<TExtraProps = unknown> {
   label?: string;
   icon?: string;
   tooltip?: string;
+
+  /**
+   * experimental, can be changed
+   */
+  readonly action?: IMenuActionItem;
   getExtraProps?: () => TExtraProps;
   iconComponent?: () => MenuSubMenuItemIconComponent<TExtraProps>;
 }

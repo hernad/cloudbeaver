@@ -5,16 +5,22 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import type { IMenu } from '../IMenu';
-import type { IMenuSubMenuEvents, IMenuSubMenuItem, IMenuSubMenuItemOptions, MenuSubMenuItemIconComponent } from './IMenuSubMenuItem';
-import { MenuItem } from './MenuItem';
+import type { IMenu } from '../IMenu.js';
+import type { IMenuActionItem } from './IMenuActionItem.js';
+import type { IMenuSubMenuEvents, IMenuSubMenuItem, IMenuSubMenuItemOptions, MenuSubMenuItemIconComponent } from './IMenuSubMenuItem.js';
+import { MenuItem } from './MenuItem.js';
 
 export class MenuSubMenuItem<TExtraProps = unknown> extends MenuItem implements IMenuSubMenuItem<TExtraProps> {
   readonly menu: IMenu;
   readonly label?: string;
   readonly icon?: string;
   readonly tooltip?: string;
-  readonly events?: IMenuSubMenuEvents;
+
+  /**
+   * experimental, can be changed
+   */
+  readonly action?: IMenuActionItem;
+  override readonly events?: IMenuSubMenuEvents;
   readonly hidden: boolean;
   readonly getExtraProps?: () => TExtraProps;
   readonly iconComponent?: () => MenuSubMenuItemIconComponent<TExtraProps>;
@@ -25,6 +31,7 @@ export class MenuSubMenuItem<TExtraProps = unknown> extends MenuItem implements 
     this.label = options.label;
     this.icon = options.icon;
     this.tooltip = options.tooltip;
+    this.action = options.action;
     this.getExtraProps = options.getExtraProps;
     this.iconComponent = options.iconComponent;
     this.hidden = false;

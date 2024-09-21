@@ -11,9 +11,9 @@ import { useObservableRef } from '@cloudbeaver/core-blocks';
 import { TextTools } from '@cloudbeaver/core-utils';
 import {
   type IDatabaseDataModel,
-  type IDatabaseResultSet,
   type IResultSetColumnKey,
   ResultSetDataKeysUtils,
+  ResultSetDataSource,
   ResultSetFormatAction,
   ResultSetViewAction,
 } from '@cloudbeaver/plugin-data-viewer';
@@ -34,7 +34,7 @@ interface ITableDataMeasurements {
 }
 
 // TODO: clear removed columns from cache
-export function useTableDataMeasurements(model: IDatabaseDataModel<any, IDatabaseResultSet>, resultIndex: number): ITableDataMeasurements {
+export function useTableDataMeasurements(model: IDatabaseDataModel<ResultSetDataSource>, resultIndex: number): ITableDataMeasurements {
   const format = model.source.getAction(resultIndex, ResultSetFormatAction);
   const view = model.source.getAction(resultIndex, ResultSetViewAction);
 
@@ -69,7 +69,7 @@ export function useTableDataMeasurements(model: IDatabaseDataModel<any, IDatabas
           text: rowStrings,
         }).map(width => width + COLUMN_PADDING);
 
-        const width = Math.min(COLUMN_HEADER_MAX_WIDTH, Math.max(columnsWidth[0], cellsWidth[0] ?? 0));
+        const width = Math.min(COLUMN_HEADER_MAX_WIDTH, Math.max(columnsWidth[0]!, cellsWidth[0] ?? 0));
 
         this.cache.set(serializedKey, width);
       },

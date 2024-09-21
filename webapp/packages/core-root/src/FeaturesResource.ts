@@ -9,17 +9,20 @@ import { makeObservable, observable } from 'mobx';
 
 import { injectable } from '@cloudbeaver/core-di';
 import { CachedDataResource } from '@cloudbeaver/core-resource';
-import { GraphQLService, WebFeatureSet } from '@cloudbeaver/core-sdk';
+import { GraphQLService, type WebFeatureSet } from '@cloudbeaver/core-sdk';
 
-import { EAdminPermission } from './EAdminPermission';
-import { SessionPermissionsResource } from './SessionPermissionsResource';
+import { EAdminPermission } from './EAdminPermission.js';
+import { SessionPermissionsResource } from './SessionPermissionsResource.js';
 
 export type ApplicationFeature = WebFeatureSet;
 
 @injectable()
 export class FeaturesResource extends CachedDataResource<ApplicationFeature[]> {
   private baseFeatures: string[];
-  constructor(private readonly graphQLService: GraphQLService, permissionsResource: SessionPermissionsResource) {
+  constructor(
+    private readonly graphQLService: GraphQLService,
+    permissionsResource: SessionPermissionsResource,
+  ) {
     super(() => []);
 
     this.baseFeatures = [];

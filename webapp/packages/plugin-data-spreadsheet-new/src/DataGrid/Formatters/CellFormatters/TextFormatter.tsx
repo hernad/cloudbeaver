@@ -10,16 +10,16 @@ import { useCallback, useContext, useEffect, useRef } from 'react';
 
 import { getComputed, IconOrImage, importLazyComponent, Loader, s, useS } from '@cloudbeaver/core-blocks';
 import { isValidUrl } from '@cloudbeaver/core-utils';
+import type { RenderCellProps } from '@cloudbeaver/plugin-data-grid';
 import type { IResultSetRowKey } from '@cloudbeaver/plugin-data-viewer';
-import type { RenderCellProps } from '@cloudbeaver/plugin-react-data-grid';
 
-import { EditingContext } from '../../../Editing/EditingContext';
-import type { IEditorRef } from '../../CellEditor';
-import { CellContext } from '../../CellRenderer/CellContext';
-import { TableDataContext } from '../../TableDataContext';
+import { EditingContext } from '../../../Editing/EditingContext.js';
+import type { IEditorRef } from '../../CellEditor.js';
+import { CellContext } from '../../CellRenderer/CellContext.js';
+import { TableDataContext } from '../../TableDataContext.js';
 import styles from './TextFormatter.module.css';
 
-const CellEditor = importLazyComponent(() => import('../../CellEditor').then(module => module.CellEditor));
+const CellEditor = importLazyComponent(() => import('../../CellEditor.js').then(module => module.CellEditor));
 
 export const TextFormatter = observer<RenderCellProps<IResultSetRowKey>>(function TextFormatter({ row, column }) {
   const editorRef = useRef<IEditorRef>(null);

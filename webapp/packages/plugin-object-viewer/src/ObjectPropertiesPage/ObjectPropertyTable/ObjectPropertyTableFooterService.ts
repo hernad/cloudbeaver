@@ -11,7 +11,7 @@ import { DATA_CONTEXT_NAV_NODES, ENodeFeature, NavTreeResource, NavTreeSettingsS
 import { resourceKeyList } from '@cloudbeaver/core-resource';
 import { ACTION_DELETE, ActionService, MenuService } from '@cloudbeaver/core-view';
 
-import { MENU_OBJECT_VIEWER_FOOTER } from './MENU_OBJECT_VIEWER_FOOTER';
+import { MENU_OBJECT_VIEWER_FOOTER } from './MENU_OBJECT_VIEWER_FOOTER.js';
 
 @injectable()
 export class ObjectPropertyTableFooterService {
@@ -48,7 +48,7 @@ export class ObjectPropertyTableFooterService {
       },
       isDisabled: (context, action) => {
         if (action === ACTION_DELETE) {
-          const selected = context.get(DATA_CONTEXT_NAV_NODES)();
+          const selected = context.get(DATA_CONTEXT_NAV_NODES)!();
           return !selected.some(node => node.features?.includes(ENodeFeature.canDelete)) || this.navTreeResource.isLoading();
         }
 
@@ -56,7 +56,7 @@ export class ObjectPropertyTableFooterService {
       },
       handler: async (context, action) => {
         if (action === ACTION_DELETE) {
-          const selected = context.get(DATA_CONTEXT_NAV_NODES)();
+          const selected = context.get(DATA_CONTEXT_NAV_NODES)!();
           const nodes = selected.filter(node => node.features?.includes(ENodeFeature.canDelete));
 
           try {

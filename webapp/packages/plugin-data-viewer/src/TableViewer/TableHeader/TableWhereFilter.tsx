@@ -7,21 +7,25 @@
  */
 import { observer } from 'mobx-react-lite';
 
-import { Container, PlaceholderComponent, useTranslate } from '@cloudbeaver/core-blocks';
+import { Container, type PlaceholderComponent, useTranslate } from '@cloudbeaver/core-blocks';
 import { InlineEditor } from '@cloudbeaver/core-ui';
 
-import type { ITableHeaderPlaceholderProps } from './TableHeaderService';
+import type { ITableHeaderPlaceholderProps } from './TableHeaderService.js';
 import styles from './TableWhereFilter.module.css';
-import { useWhereFilter } from './useWhereFilter';
+import { useWhereFilter } from './useWhereFilter.js';
 
 export const TableWhereFilter: PlaceholderComponent<ITableHeaderPlaceholderProps> = observer(function TableWhereFilter({ model, resultIndex }) {
   const translate = useTranslate();
   const state = useWhereFilter(model, resultIndex);
 
+  if (!state.supported) {
+    return null;
+  }
+
   return (
-    <Container className={styles.imbeddedEditor}>
+    <Container className={styles['imbeddedEditor']}>
       <InlineEditor
-        className={styles.inlineEditor}
+        className={styles['inlineEditor']}
         name="data_where"
         value={state.filter}
         placeholder={translate(state.constraints?.supported ? 'table_header_sql_expression' : 'table_header_sql_expression_not_supported')}
