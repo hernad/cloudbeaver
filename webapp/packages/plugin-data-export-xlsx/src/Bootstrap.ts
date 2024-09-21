@@ -7,7 +7,7 @@
  */
 import { Bootstrap as B, injectable } from '@cloudbeaver/core-di';
 
-import { DataExportXlsxMenuService } from './DataExportXlsxMenuService';
+import { DataExportXlsxMenuService } from './DataExportXlsxMenuService.js';
 
 @injectable()
 export class Bootstrap extends B {
@@ -15,9 +15,8 @@ export class Bootstrap extends B {
     super();
   }
 
-  register(): void {
+  override register(): void {
     this.dataExportXlsxMenuService.register();
   }
 
-  load(): void {}
 }

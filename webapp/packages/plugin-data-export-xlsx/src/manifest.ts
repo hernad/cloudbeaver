@@ -8,18 +8,18 @@
 import type { PluginManifest } from '@cloudbeaver/core-di';
 
 export const dataExportXlsxManifest: PluginManifest = {
+
   info: {
     name: 'Data Export Xlsx Plugin',
   },
 
   providers: [
-    () => import('./Bootstrap').then(m => m.Bootstrap),
-    () => import('./DataExportXlsxMenuService').then(m => m.DataExportXlsxMenuService),
-    () => import('./DataExportXlsxSettingsService').then(m => m.DataExportXlsxSettingsService),
-    () => import('./DataExportXlsxService').then(m => m.DataExportXlsxService),
-    () => import('./DataExportXlsxProcessService').then(m => m.DataExportXlsxProcessService),
-    () => import('./DataTransferProcessorsResource').then(m => m.DataTransferProcessorsResource),
-    () => import('./LocaleService').then(m => m.LocaleService),
-    () => import('./Dialog/DefaultExportOutputSettingsResource').then(m => m.DefaultExportOutputSettingsResource),
+    () => import('./Bootstrap.js').then(m => m.Bootstrap),
+    () => import('./DataExportXlsxMenuService.js').then(m => m.DataExportXlsxMenuService),
+    () => import('./DataExportXlsxService.js').then(m => m.DataExportXlsxService),
+    () => import('./DataExportXlsxProcessService.js').then(m => m.DataExportXlsxProcessService),
+    () => import('./DataTransferProcessorsResource.js').then(m => m.DataTransferProcessorsResource),
+    () => import('./LocaleService.js').then(m => m.LocaleService),
+    () => import('./Dialog/DefaultExportOutputSettingsResource.js').then(m => m.DefaultExportOutputSettingsResource),
   ],
 };

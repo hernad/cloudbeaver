@@ -13,6 +13,7 @@ export * from './Action/Actions/ACTION_DELETE.js';
 export * from './Action/Actions/ACTION_EDIT.js';
 export * from './Action/Actions/ACTION_DUPLICATE.js';
 export * from './Action/Actions/ACTION_EXPORT.js';
+export * from './Action/Actions/ACTION_EXPORT_XLSX.js';
 export * from './Action/Actions/ACTION_FILTER.js';
 export * from './Action/Actions/ACTION_LAYOUT.js';
 export * from './Action/Actions/ACTION_NEW_FOLDER.js';

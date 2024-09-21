@@ -14,18 +14,16 @@ export class LocaleService extends Bootstrap {
     super();
   }
 
-  register(): void | Promise<void> {
+  override register(): void | Promise<void> {
     this.localizationService.addProvider(this.provider.bind(this));
   }
-
-  load(): void | Promise<void> {}
 
   private async provider(locale: string) {
     switch (locale) {
       case 'it':
-        return (await import('./locales/it')).default;
+        return (await import('./locales/it.js')).default;
       default:
-        return (await import('./locales/en')).default;
+        return (await import('./locales/en.js')).default;
     }
   }
 }
